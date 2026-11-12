@@ -1,0 +1,33 @@
+# Virtual environments & Python cache
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Large dataset archives & unpacked raw data (never commit 8.6GB data to Git)
+img_data.zip
+data/monthly_20d/
+data/*.zip
+data/*.dat
+data/*.feather
+
+# Model weights & large prediction dumps (share via cloud drive or reproduce via scripts)
+outputs/checkpoints/*.pt
+outputs/checkpoints/*.pth
+outputs/checkpoints/*.pkl
+outputs/predictions/*.parquet
+outputs/predictions/*.feather
+outputs/predictions/*.csv
+
+# Keep directory structure tracked
+!outputs/**/.gitkeep
+!data/.gitkeep
+
+# macOS / IDE metadata
+.DS_Store
+__MACOSX/
+._*

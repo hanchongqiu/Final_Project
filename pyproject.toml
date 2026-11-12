@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "visual-alpha"
+version = "0.1.0"
+description = "MSDM 5054 Final Project: Statistical ML Audit of Chart-Based Return Prediction ((Re-)Imag(in)ing Price Trends)"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "numpy>=1.26,<3.0",
+    "pandas>=2.2,<3.0",
+    "pyarrow>=16.0",
+    "torch>=2.3",
+    "scikit-learn>=1.5",
+    "scipy>=1.13",
+    "lightgbm>=4.5",
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "tqdm>=4.66",
+    "pyyaml>=6.0",
+    "jupyterlab>=4.2",
+    "ipykernel>=6.29",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "ruff>=0.6",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/visual_alpha"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
