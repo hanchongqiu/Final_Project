@@ -119,6 +119,7 @@
 | :--- | :---: | :--- | :--- | :--- |
 | 2026-11-12 | 组员 A (组长) | GitHub Copilot (VS Code Agent) | 解读课程任务书、核验 1993–2019 数据集字段与像素结构、配置 `uv` 环境及起草项目工程规范文档体系 | 人工逐项确认研究切口、工程量边界与四人任务分工方案 |
 | 2026-11-12 | 组员 A (组长) | GitHub Copilot (VS Code Agent) | 辅助实现 `src/visual_alpha/` 公共底座、单元测试、`exp_baseline.py` 5-seed 基线训练及 `exp_sq3_calibration.py` 校准分析与出图脚本 | 通过 `pytest` 校验网络维度与指标计算，并在 M5 Pro 上完整跑通 1993–2019 实验验证复现结果 |
+| 2026-11-12 | 组员 A (组长) | GitHub Copilot (VS Code Agent) | 起草 NeurIPS 格式报告主框架 (`report/main.tex`) 及已完成模块（Abstract 框架、Sec 1、Sec 2、Sec 5、Sec 7 声明与参考文献） | 人工核对全部实测表格数字、公式定义与 PDF 编译排版 |
 | *(待填)* | 组员 B | | 辅助编写 SQ1 跨模型对比与图像遮挡消融代码 | |
 | *(待填)* | 组员 C | | 辅助编写 SQ2 噪声阈值过滤与多周期训练实验代码 | |
 | *(待填)* | 组员 D | | 辅助编写 SQ4 现代重训、Grad-CAM 可视化及英文报告语法润色 | |

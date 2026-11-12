@@ -1,0 +1,78 @@
+% =============================================================================
+% NeurIPS-Style 8-Page Technical Report Style (MSDM 5054 Final Project)
+% Clean standalone style matching NeurIPS 2024/2025 typography & margins:
+% 10pt Times/TeX Gyre Termes, 5.5in x 9.0in text block, single-column academic layout.
+% =============================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{neurips_msdm5054}[2026/11/12 MSDM 5054 NeurIPS-style Report Format]
+
+\RequirePackage[
+  letterpaper,
+  textwidth=5.5in,
+  textheight=9.0in,
+  top=1.0in,
+  centering
+]{geometry}
+
+\RequirePackage{newtxtext}
+\RequirePackage{newtxmath}
+\RequirePackage{microtype}
+\RequirePackage{titlesec}
+\RequirePackage{fancyhdr}
+
+\setlength{\parindent}{1em}
+\setlength{\parskip}{3.5pt plus 1pt minus 1pt}
+\renewcommand{\baselinestretch}{1.03}
+
+% Section formatting matching NeurIPS
+\titleformat{\section}
+  {\large\bfseries}{\thesection}{0.75em}{}
+\titlespacing*{\section}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
+
+\titleformat{\subsection}
+  {\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\subsection}{0pt}{6pt plus 2pt minus 1pt}{2pt plus 1pt minus 1pt}
+
+\titleformat{\subsubsection}
+  {\normalsize\itshape}{\thesubsubsection}{0.5em}{}
+\titlespacing*{\subsubsection}{0pt}{4pt plus 1pt minus 1pt}{1.5pt}
+
+% Footer notice on page 1
+\fancypagestyle{firstpage}{%
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+  \fancyfoot[C]{\footnotesize MSDM 5054 Statistical Machine Learning --- Final Project Technical Report (Fall 2026).}
+}
+
+\pagestyle{plain}
+
+% NeurIPS top/bottom title rules
+\renewcommand{\maketitle}{%
+  \par
+  \begingroup
+    \thispagestyle{firstpage}%
+    \centering
+    \hrule height 4pt
+    \vskip 0.18in
+    {\LARGE\bfseries \@title \par}
+    \vskip 0.18in
+    \hrule height 1pt
+    \vskip 0.18in
+    {\normalsize \@author \par}
+    \vskip 0.14in
+  \endgroup
+}
+
+% NeurIPS abstract box
+\renewenvironment{abstract}{%
+  \vskip 0.04in
+  \centerline{\large\bfseries Abstract}
+  \vspace{0.2ex}%
+  \begin{quote}\small
+}{%
+  \par\end{quote}
+  \vskip 0.08in
+}
+
+\endinput
