@@ -107,9 +107,35 @@ Every model across Sections 2--6 is evaluated via four complementary metrics: (1
 % SECTION 3: RQ1 SLOT (Member B)
 % =============================================================================
 \section{RQ1: Architectural Inductive Bias and Visual Component Ablation}
-\teammatebox{Member B --- Section 3 ($\approx 1.4$ pages, includes Table 2 + Figure 1)}{%
-  \textbf{Planned Content:} Controlled comparison across five model families trained on identical 1993--1999 splits and evaluated on the full $N=1,491,887$ OOS panel: (B1) Incremental PCA + L2 Logistic Regression, (B2) 48 regional pixel-summary features + LightGBM, (B3) temporal-only 1D-CNN on $(192 \times 20)$ reshaped slices, (B0) Baseline 2D-CNN, and (B4) higher-capacity 1-channel ResNet. Second, occlusion and retraining ablations zeroing out volume bars (\texttt{rows 52:64}), early 10 days (\texttt{cols 0:30}), and recent 10 days (\texttt{cols 30:60}) via \texttt{visual\_alpha.apply\_image\_mask}.%
-}
+We hold the chart pixels fixed and vary how the model processes them. The temporal CNN groups each day's three columns into 192 channels and slides filters along 20 days. The baseline also shares local filters across price levels. Both use the same training split, Adam settings and early stopping. Differences in pooling and parameter count limit attribution to any one architectural choice. For comparison, we fit a 64-component PCA and logistic classifier on 150,000 training charts, fit LightGBM on 12 pixel summaries per five-day block, and train a four-stage residual network.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Architecture comparison on the same 1,491,887 test charts, 2000--2019. The long--short portfolio is rebalanced monthly.}
+\label{tab:sq1}
+\begin{tabular}{lrrrrr}
+\toprule
+Model & Accuracy (\%) & CE & AUC & ECE & L/S Sharpe \\
+\midrule
+2D-CNN (seed 42) & 52.33 & 0.6924 & 0.5322 & 0.0166 & 1.70 \\
+PCA + logistic regression & 51.35 & 0.6927 & 0.5237 & 0.0088 & 1.52 \\
+Pixel summaries + LightGBM & 52.12 & 0.6920 & 0.5317 & 0.0098 & 1.18 \\
+Temporal 1D-CNN & 51.62 & 0.6932 & 0.5254 & 0.0183 & 1.49 \\
+Residual CNN & 51.66 & 0.6925 & 0.5252 & 0.0075 & 0.98 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 2D-CNN leads the temporal model by 0.0068 AUC and 0.21 Sharpe (Table~\ref{tab:sq1}). The larger residual network also trails the baseline. Hand-crafted pixel summaries recover much of the overall ranking performance: the tree model comes within 0.0005 AUC, yet its long--short Sharpe is 1.18 against 1.70. Overall discrimination and within-month ranking of the portfolio tails measure different properties. Each alternative was trained once, so small gaps warrant caution.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.96\linewidth]{../outputs/figures/fig1_sq1_ablation.pdf}
+\caption{Architecture and occlusion on the full test panel. Right panels show changes from the intact seed-42 chart. Bars with whiskers carry paired 95\% percentile intervals from 2,000 circular block-bootstrap draws of 12-month blocks, retaining all stocks in each selected month.}
+\label{fig:sq1}
+\end{figure}
+
+With the weights fixed, hiding the first ten days preserves AUC (0.5332), while hiding the last ten days cuts AUC to 0.5031 and Sharpe to 0.34 (Figure~\ref{fig:sq1}). The equal-area masks indicate much greater sensitivity to the recent half of the chart. Hiding volume alone reduces accuracy by 0.79 percentage points and Sharpe by 0.21. After training a new CNN with volume masked throughout (best validation epoch 10, stopped at 12), accuracy recovers to 51.90\% and AUC to 0.5270. Both remain below the full-chart baseline. The retrained portfolio earns a smaller annualized spread (15.61\% versus 21.32\%) with lower annualized volatility (8.52\% versus 12.57\%), giving a higher Sharpe (1.83 versus 1.70) in this single-seed comparison.
 
 % =============================================================================
 % SECTION 4: RQ2 SLOT (Member C)
