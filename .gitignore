@@ -12,6 +12,7 @@ __pycache__/
 img_data.zip
 data/monthly_20d/
 data/*.zip
+data/.sq2-downloads.*/
 data/*.dat
 data/*.feather
 

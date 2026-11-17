@@ -6,6 +6,8 @@
 **Goal**: Predict 20-day US stock return direction from $64 \times 60$ binary OHLC+MA+Volume chart images (1993–2019, $N = 2,196,994$) and investigate four focused scientific questions (SQ1: Inductive Bias & Masking, SQ2: Label Noise & Margin Filtering, SQ3: Probability Calibration, SQ4: Concept Drift & Grad-CAM Interpretability).
 
 ## Essential Documentation Map (Read Before Acting)
+On branch `feat/sq2-label-noise`, start with [Member C's GPU execution plan](./docs/tasks/SQ2_EXECUTION_PLAN_zh.md). It contains the data preparation command, verified sample counts, C0–C7 matrix, evaluation details, and deliverables. The assignment and the three relevant lecture PDFs are included in this checkout.
+
 Do not guess schemas, architectures, or metrics. Always consult the authoritative doc for your current task:
 - **Data schema, pixel coordinates, CNN spec & prediction output contract**: [docs/DATA_AND_CONTRACTS.md](./docs/DATA_AND_CONTRACTS.md)
 - **Team milestones, scope guardrails & integration checklist**: [docs/PROJECT_CHARTER.md](./docs/PROJECT_CHARTER.md)
