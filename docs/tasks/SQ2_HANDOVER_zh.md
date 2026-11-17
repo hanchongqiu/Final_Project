@@ -1,17 +1,16 @@
 # SQ2 交接说明（组员 C → 组长 A / 组员 D）
 
-> 交付日期 2026-11-17。分支 `feat/sq2-label-noise`，实验脚本、单测、表格、图与日志已随本文档一并提交；预测 parquet 与 checkpoint 按仓库约定不入 Git（见 §4/§5 复跑）。全部产物已落盘，可从预测 parquet 免训练重建表与图（`--summarize` 已验证）。执行矩阵与验收标准见 [SQ2_EXECUTION_PLAN_zh.md](./SQ2_EXECUTION_PLAN_zh.md)。
+组员 C 为 Dongqing Zhao。英文第 4 节及图 2 已并入[报告 PDF](../../report/main.pdf)（当前第 3–4 页）。[单页 PowerPoint](../../report/sq2_presentation.pptx) 带英文讲者备注，可直接并入组内 Slide 4。[主表](../../outputs/tables/sq2_noise_and_horizon.csv)记录 C0–C7 在各自完整测试集上的表现。
 
-## 1. 一段话结论（给组长 A）
+## 1. 给组长的英文摘要句
 
-- **EN**: On the full 1,491,887-image OOS test set (2000–2019), margin-filtering training samples monotonically hurt Accuracy (52.33%→51.34%), CE (0.6924→0.7131), AUC (0.5322→0.5170) and ECE (0.0166→0.0786), and C2−C0 monthly long-short returns are significantly negative (−0.37%, 95% CI [−0.60, −0.18]); label smoothing 0.1 is the only variant improving both CE (−0.0003) and ECE (0.0166→0.0137) with slightly better Sharpe (1.70→1.74, not significant); on 1,471,746 common images, accuracy ranks 60d (52.52%) > 20d (52.28%) ≈ 5d (52.27%) while 20d has the best AUC (0.5315) and per-period long-short return (1.73% vs 1.62%/1.04%).
-- **中文**：149 万张样本外图上，按收益幅度过滤训练样本单调损害 Acc/CE/AUC/ECE 全部四指标（C2−C0 月均多空收益差 −0.37%，95% CI [−0.60, −0.18]，显著为负）；label smoothing 0.1 是唯一同时改善 CE 与 ECE 的变体（ECE 0.0166→0.0137，Sharpe 1.70→1.74，不显著）；共同样本 1,471,746 张图上 Acc 60d(52.52%) > 20d(52.28%) ≈ 5d(52.27%)，但 AUC 与单期多空收益均以 20d 最高（0.5315、1.73%）。
+Excluding training returns below 5% in magnitude reduced test AUC from 0.5322 to 0.5170, while retaining all charts and smoothing labels reduced calibration error from 0.0166 to 0.0137.
 
 ## 2. 核心数字表
 
 ### 2.1 八配置主表（完整 OOS 测试集，`sq2_noise_and_horizon.csv`）
 
-| 编号 | 训练条件 | 训练数（保留率） | Acc % | CE | AUC | ECE | LS Sharpe (t) | 月均 LS % | 最优轮 |
+| 编号 | 训练条件 | 训练数（保留率） | Acc % | CE | AUC | ECE | LS Sharpe (t) | 平均持有期 LS % | 最优轮 |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
 | C0 | 20d 全样本（复用 seed42） | 482,926 (100%) | 52.33 | 0.6924 | 0.5322 | 0.0166 | 1.70 (7.59) | 1.78 | 10 |
 | C1 | 20d \|Retx\|≥1% | 429,880 (89.02%) | 52.13 | 0.6940 | 0.5303 | 0.0265 | 1.80 (8.05) | 1.61 | 7 |
@@ -22,7 +21,7 @@
 | C6 | 5d 全样本 | 485,346 (100%) | 52.28 | 0.6976 | 0.5299 | 0.0419 | 2.24 (10.02) | 1.07 | 4 |
 | C7 | 60d 全样本 | 475,880 (100%) | 52.52 | 0.6926 | 0.5296 | 0.0190 | 1.23 (5.49) | 1.62 | 14 |
 
-测试集：20d 1,491,887 / 5d 1,498,816 / 60d 1,471,746；验证集：206,968 / 208,005 / 203,949。月均 LS = 逐调仓月 top10%−bottom10% 等权多空（20d 组按月，含 √12 年化的 Sharpe）。
+测试集：20d 1,491,887 / 5d 1,498,816 / 60d 1,471,746；验证集：206,968 / 208,005 / 203,949。每月生成一次信号，按预测概率排序；最高与最低十分位等权收益之差使用本周期收益。Sharpe 使用 √12 年化。
 
 ### 2.2 共同样本三周期对比（1,471,746 张图键交集，`sq2_common_sample_horizon.csv`）
 
@@ -32,36 +31,35 @@
 | 20d (C0) | 50.55 | 52.28 | 0.6925 | **0.5315** | 0.0170 | 1.66 | **1.73** |
 | 60d (C7) | 51.51 | **52.52** | 0.6926 | 0.5296 | 0.0190 | 1.23 | 1.62 |
 
-### 2.3 市值分组训练保留率（C0 训练池市值五分位，`sq2_filter_retention_by_cap.csv`）
+### 2.3 市值分组训练保留率（C0 训练池正市值五分位，`sq2_filter_retention_by_cap.csv`）
 
 | 组 | C1 τ=1% | C2 τ=3% | C3 τ=5% | C4 \|t\|≥0.5 |
 |---|---:|---:|---:|---:|
-| Q1（小盘） | 87.16 | 75.73 | 64.28 | 90.00 |
-| Q5（大盘） | 89.11 | 69.52 | 53.11 | 97.78 |
+| Q1（小盘） | 90.57 | 81.45 | 70.95 | 91.64 |
+| Q5（大盘） | 89.11 | 69.49 | 52.98 | 97.86 |
 
-要点：固定收益阈值 τ 越严，大盘股被删越多（C3 从 64.28% 降到 53.11%——大盘波动小、|Retx| 小）；t-stat 过滤方向相反，大盘保留 97.78%（按波动标准化后信噪比高）。过滤同时改变样本量与股票构成。
+原始 482,926 个训练样本中有 37,285 个负市值，数据说明没有解释负号。本次仅用其余 445,641 个正值排市值五分位。5% 过滤在小盘组保留 70.95%，在大盘组保留 52.98%。这一筛选只用于市值诊断。
 
 ### 2.4 成对分块 bootstrap（240 个月、块长 3、2000 次，`sq2_paired_bootstrap.csv`）
 
-| 对比 | 月均 LS 差 % | 95% CI | 结论 |
+| 对比 | 月均 LS 差（百分点） | 95% CI（百分点） | 结论 |
 |---|---:|---|---|
 | C2−C0 | **−0.373** | [−0.603, −0.179] | **显著为负** |
 | C5−C0 | +0.023 | [−0.108, +0.164] | 不显著 |
 
 ⚠️ 表中 `obs_sharpe_diff`（C2−C0 为 −0.74）是**收益差序列自身的 Sharpe**（√12·mean(diff)/std(diff)），**不是**两个模型 Sharpe 之差（那会是 1.76−1.70=+0.07）。报告与讲稿必须写清这个区别，否则与主表 Sharpe 列自相矛盾。
 
-## 3. 结果解读要点（供报告第 4 节）
+## 3. 解读边界
 
-1. **边际过滤：单调损害。** τ 从 0→5%，Acc 52.33→51.34、CE 0.6924→0.7131、AUC 0.5322→0.5170、ECE 0.0166→0.0786 单调变差；样本越少，早停越早（ep 10→3），欠拟合加重。C1/C2 的 LS Sharpe（1.80/1.76）略高于 C0（1.70），但成对分块 bootstrap 显示 C2−C0 月均多空收益差 −0.37%（CI [−0.60, −0.18]）显著为负——Sharpe 点值的小优势不成立，过滤未带来更好的概率、排序或收益。C4（t-stat，保留 94.35%）与 C1–C3（89%/72%/59%）保留率不可比，且同样全面差于 C0。
-2. **label smoothing 0.1：唯一一致的小改善。** CE 0.6924→0.6921、ECE 0.0166→0.0137（−0.0029），Acc/AUC/Sharpe/月均收益同向微升（1.70→1.74，1.78→1.80），bootstrap CI 跨 0 不显著。方向上"软化硬标签"优于"删疑似噪声样本"。
-3. **周期：准确率与经济收益不同序。** 共同样本上 Acc 60d(52.52%) > 20d(52.28%) ≈ 5d(52.27%)（60d 上涨占比也最高 51.51%，部分反映基率差异）；AUC 20d 最高（0.5315）；单期多空收益 20d(1.73%) > 60d(1.62%) > 5d(1.04%)。跨周期 Sharpe（2.24/1.66/1.23）只作描述：5d 每月仅一次信号（月内不重复调仓）、60d 相邻持有期重叠（收益自相关），不可解释为可实施策略的优劣排序。
-4. **局限。** 单种子（seed 42）；固定阈值同时改变训练样本量与构成（见 2.3），差异不能归因于"去噪"单一机制；C4 保留率与 C1–C3 不可比；60d 前瞻窗口跨越 1999/2000 分界（训练池尾部图像的标签部分落在测试期），切分按图像日期为准；跨周期 Sharpe 的可比性见第 3 点。
+- 四个固定收益阈值下，Accuracy、CE、AUC 和 ECE 随阈值升高逐步变差。Sharpe 依次为 1.70、1.80、1.76、1.35。早停轮次和保留率可描述，无法据此判定欠拟合或分解偏差与方差。
+- C2 相对 C0 的 AUC 低 0.0062，Sharpe 高 0.07，月均多空收益低 0.373 个百分点。C5 的 CE 与 ECE 分别低 0.00030、0.00286，月均收益差为 +0.023 个百分点。上表区间只检验月均收益差；单种子实验未估计跨训练种子的变异。
+- 跨周期比较使用 §2.2 的共同样本。60d 上涨占比也最高（51.51%）；20d 的 AUC 和单期收益最高。5d 每月仅取一个信号，60d 持有期重叠。按图像日期切分，1999 年末图像的远期标签可能延伸到 2000 年。原基线与新训练的初始化不保证相同。
 
 ## 4. 文件清单（交 A/D）
 
 | 文件 | 用途 |
 |---|---|
-| `outputs/predictions/sq2_c{1..7}_*.parquet`（7 个） | C1–C7 样本外测试预测（标准 13+2 列契约，C6/C7 含本周期收益列） |
+| `outputs/predictions/sq2_c{1..7}_*.parquet`（7 个） | C1–C7 样本外测试预测（标准 11 列，跨周期另加 2 列，C6/C7 含本周期收益列） |
 | `outputs/predictions/baseline_seed42.parquet` | 兼作 C0 测试预测（勿改） |
 | `outputs/predictions/val_sq2_c{0..7}_*.parquet`（8 个） | 验证集预测（未过滤；C0 由既有权重重建；供 A 做 SQ3 校准/后续分析） |
 | `outputs/checkpoints/sq2_*.pt`（7 个）+ `baseline_seed42.pt` | 最优验证权重（C0 为原始基线；供 D 重推理/Grad-CAM 对照） |
@@ -70,11 +68,13 @@
 | `outputs/tables/sq2_common_sample_horizon.csv` | 共同样本三周期表（§2.2） |
 | `outputs/tables/sq2_filter_retention_by_cap.csv` | 市值分组保留率（§2.3） |
 | `outputs/tables/sq2_paired_bootstrap.csv` | 成对 bootstrap（§2.4，注意 obs_sharpe_diff 定义） |
-| `outputs/figures/fig2_sq2_noise_horizon.pdf` / `.png`(300dpi) | 报告图 2： 过滤权衡 + (b) 周期与平滑 |
+| `outputs/figures/fig2_sq2_noise_horizon.pdf` / `.png`(300dpi) | 图 2(a) 完整 20d 测试集过滤对照；(b) 共同样本周期比较与完整 20d 测试集平滑对照 |
 | `logs/sq2_gpu0.log`、`logs/sq2_gpu1.log`、`logs/sq2_smoke_c2.log` | 双 RTX 3090 训练全程日志（含逐轮 loss 与 OOS 行） |
-| `experiments/exp_sq2_label_noise.py`、`tests/test_sq2_horizon_fallback.py`、`tests/conftest.py` | 实验脚本与单测（已提交至本分支） |
+| `experiments/exp_sq2_label_noise.py`、`tests/test_sq2_horizon_fallback.py`、`tests/conftest.py` | 实验脚本与跨周期单测 |
 
 ## 5. 复跑命令
+
+本地已有原始数据包 `data/img_data.zip` 与服务器归档 `data/sq2_outputs_20261117.zip`。在新 checkout 中将前者的 `monthly_20d/` 解到 `data/`，从后者恢复 `outputs/predictions/` 和 `outputs/checkpoints/`；保留当前分支里的表、图与 manifest。要复核已有结果，安装依赖并执行第 ③ 步。
 
 ```bash
 # ① 数据准备 + 环境自检（详见 SQ2_EXECUTION_PLAN_zh.md §1）
@@ -84,9 +84,9 @@ uv run python scripts/verify_env.py && uv run pytest -q
 
 # ② 全矩阵训练（双 GPU 并行；已有预测会被跳过，加 --force 才重训）
 CUDA_VISIBLE_DEVICES=0 .venv/bin/python experiments/exp_sq2_label_noise.py \
-    --exp C1,C2,C3,C4 > logs/sq2_gpu0.log 2>&1 &
+    --train-only --exp C1,C2,C3,C4 > logs/sq2_gpu0.log 2>&1 &
 CUDA_VISIBLE_DEVICES=1 .venv/bin/python experiments/exp_sq2_label_noise.py \
-    --exp C5,C6,C7 > logs/sq2_gpu1.log 2>&1 &
+    --train-only --exp C5,C6,C7 > logs/sq2_gpu1.log 2>&1 &
 wait
 
 # ③ 免训练重建全部表与图 2（从已存预测 + manifest）
@@ -96,40 +96,13 @@ wait
 CUDA_VISIBLE_DEVICES=0 .venv/bin/python experiments/exp_sq2_label_noise.py --exp C2 --force
 ```
 
-## 6. 自检记录
+## 6. 复核记录（2026-11-17）
 
-**交付前校验（2026-11-17，本次执行）：129/129 PASS，0 FAIL。**
-脚本逻辑：16 个 parquet（8 实验 × test/val）× 7 项逐文件检查 + 17 项跨文件/数据池重建检查。逐项结果：
+- 本地自检验证 27 年的 2,196,994 条数据。仓库原有 7 项测试通过。
+- 逐行比较全部 16 份预测与原始切分。年份、图像行号、标签、日期和同周期收益一致；收益按预测文件存储精度对齐。主键唯一，概率与 logits 一致。八组训练行数、正例率、验证 CE 和 checkpoint 最优轮次匹配。C0 测试预测的 SHA-256 与准备脚本一致。
+- 从已存预测、运行清单和原始标签独立重建八组主表、共同样本表及配对 bootstrap 表，与服务器版本一致。另重算正市值分组。初版图 2(b) 使用三个不同的样本总体，现统一取共同样本；(a) 的 Sharpe 与 AUC 分开标度。
+- 双 GPU 的运行清单更新已加锁。两个训练进程可使用 `--train-only`，结束后统一执行一次 `--summarize`。
 
-| 检查项 | 范围 | 结果 |
-|---|---|---|
-| 1 主键 (year,row_idx) 唯一 | 16 个文件 | PASS（0 重复） |
-| 2 prob_up 有限且 ∈[0,1]；logit_down/logit_up 存在且全有限 | 16 个文件 | PASS |
-| 3 y_true ∈{0,1} | 16 个文件 | PASS |
-| 4 标签对齐原始 feather（每年随机 ≥500 行；C6 用 Retx_5d_label、C7 用 Retx_60d_label、其余 Retx_20d_label） | 16 个文件（test 每个抽样 1 万行 / val 3,500 行） | PASS，0 错配 |
-| 5 C0–C5 test 键集完全一致且 = baseline_seed42 键；val 键集一致（设计上未过滤） | 6×2 文件 | PASS |
-| 6 C6/C7 含本周期 Retx_{h}/Ret_{h} 列 | 4 个文件 | PASS |
-| 7 行数 = 预期 = manifest（test 1,491,887/1,498,816/1,471,746；val 206,968/208,005/203,949） | 16 个文件 | PASS |
-| X 训练池嵌套与划分复算：从原始 feather 经公共 `ChartDataset` + seed42 划分重建训练池键（482,926），按阈值重建 C1/C2/C3/C4 键集——数量与 manifest 逐一相等（429,880/349,785/283,161/455,654），且 C3⊆C2⊆C1⊆池、C4⊆池；三周期 val/test 键集与重建划分完全一致 | 原始数据 | PASS |
+## 7. 英文讲稿（117 词，约 55 秒）
 
-说明：val parquet 按设计未过滤、六组键全同，无法单独证明训练池嵌套，故嵌套验证采用上述"原始 feather 重建键集"法（比间接验证更强）。
-
-**此前环境自检（2026-11-17，训练前）**：`verify_env.py` 6/6 PASS（CUDA / 双 RTX 3090）；`pytest` 7/7 通过（含跨周期收益回退单测）；C0 复算五指标与交付基线一致（52.33225% / CE 0.692360 / AUC 0.532183 / ECE 0.016573 / LS Sharpe 1.696175）；分组样本数与执行计划零偏差。
-
-**图 2**：PNG 3110×1190 @300dpi；从当前主表 CSV 重渲染 PNG 与仓库文件 **sha256 逐位一致**，mtime（18:06:33）晚于最后落盘的预测（18:05:31）——图与当前数据完全同步。视觉层面（文字重叠、双轴可读性）本次校验 Agent 不支持图像输入未做，需 A/D 人工目检一次。
-
-## 7. 给 D 的展示素材（5 页内 1 页 + 约 55 秒讲稿提纲）
-
-**一页要点**（标题建议："SQ2 — 监督信号：过滤、平滑与周期"）：
-- 左：图 2(a) 缩略——τ↑ 时保留率(灰柱)↓，AUC/Sharpe 双线同步下滑；C4 空心点单列。
-- 右：图 2(b) 缩略 + 一行字"smoothing: ECE 0.0166→0.0137"。
-- 底部三条结论：① 过滤单调损害四指标，C2−C0 月均 LS −0.37%（CI [−0.60, −0.18]）显著为负；② 平滑 0.1 唯一改善 CE/ECE，收益微升不显著；③ 共同样本 Acc 60d>20d≈5d，但 AUC 与单期 LS 收益 20d 最高；跨周期 Sharpe 仅描述。
-- 局限一行：单种子；固定阈值同时改样本量与构成；60d 窗口跨 1999/2000 界（按图像日期切分）。
-
-**约 55 秒讲稿提纲**：
-1. (≈10s) 问题：图像与网络固定，监督信号怎么选？三个旋钮——训练样本过滤、标签平滑、预测周期。
-2. (≈10s) 设计：同一 CNN、同一 1993–1999 训练/验证切分，只改监督：|Retx_20d|≥1/3/5%、|t|≥0.5、平滑 0.1、5d/60d 标签；验证与测试集永不过滤。
-3. (≈12s) 结果一：过滤越狠，Acc/CE/AUC/ECE 全线越差；C2 的 Sharpe 看起来略高，但逐月成对 bootstrap 显示 C2−C0 多空收益差 −0.37%、显著为负——删"疑似噪声"样本没有收益。
-4. (≈10s) 结果二：把硬标签软化到 0.95/0.05，是唯一同时改善 CE 和校准（ECE 0.0166→0.0137）的改动，收益略优但不显著。
-5. (≈10s) 结果三：换周期，60d 方向最准（52.52%），但 20d 排序最强（AUC 0.5315）、单期赚得最多（1.73%）；5d 月内只有一次信号、60d 持有期重叠，Sharpe 只作描述。
-6. (≈3s) 收尾：结论——全样本 + 轻度平滑最稳；单种子，小差异只作描述。
+For SQ2, we kept the same stock charts and CNN and changed how the model learned from small returns. If a stock barely rises or falls, its direction might be hard to predict. We removed those cases from training and tested on every eligible chart. As the cutoff rose to five percent, we kept only fifty-nine percent of training charts, and ranking accuracy, measured by AUC, fell from 0.532 to 0.517. Keeping the charts and softening the labels improved calibration, with no clear gain in average portfolio return. Finally, on the same charts, sixty days gave the highest directional accuracy. Twenty days gave the best ranking and the largest average long–short spread, 1.73 percent per holding period.

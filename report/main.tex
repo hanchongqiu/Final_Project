@@ -27,10 +27,10 @@
 \author{
   \textbf{Hanchong Qiu} \quad
   \textbf{[Member B Name]} \quad
-  \textbf{[Member C Name]} \quad
+  \textbf{Dongqing Zhao} \quad
   \textbf{[Member D Name]} \\[3pt]
   Department of Mathematics / Data-Driven Modeling, HKUST \\
-  \texttt{\{hqiu, memberb, memberc, memberd\}@connect.ust.hk}
+  \texttt{hqiu@connect.ust.hk}
 }
 
 \begin{document}
@@ -40,7 +40,7 @@
 % ABSTRACT (Drafted with completed Baseline + RQ3 numbers; 1 sentence open for RQ1/2/4)
 % =============================================================================
 \begin{abstract}
-Jiang, Kelly, and Xiu (2023) demonstrate that convolutional neural networks (CNNs) trained directly on binary stock price-and-volume chart images generate economically substantial out-of-sample return forecasts (``Visual Alpha''). Yet from a statistical machine learning perspective, why high-capacity vision architectures succeed in an environment characterized by extreme aleatoric noise ($\text{accuracy} \approx 52\%$) and structural non-stationarity remains insufficiently understood. Using a panel of $2,196,994$ monthly U.S.\ equity chart observations from 1993 to 2019, we build a unified, leak-free evaluation benchmark and conduct a four-stage diagnostic audit across the machine learning pipeline: (1) architectural inductive bias and spatial component masking, (2) supervision noise under near-zero return margins and prediction horizons, (3) probability calibration and selective tail prediction, and (4) temporal concept drift and Grad-CAM visual attribution. Our baseline replication confirms that a $708\text{K}$-parameter 2D-CNN trained strictly on 1993--1999 charts achieves a persistent 2000--2019 out-of-sample equal-weighted long-short decile Sharpe ratio of $1.74 \pm 0.19$ across five seeds ($1.68$ for the 5-seed ensemble, $+22.33\%$ annualized spread, $t = 7.51$). Further, deep ensembling cuts expected calibration error by $51.2\%$ ($0.0215 \to 0.0105$) and elevates directional accuracy monotonically from $52.50\%$ at full market coverage to $57.40\%$ in the top-$5\%$ confidence tail, explaining how modest full-sample classification edges translate into strong cross-sectional portfolio performance. \textit{[Placeholder: Insert 1--2 concise quantitative takeaways from RQ1, RQ2, and RQ4 upon branch integration.]}
+Jiang, Kelly, and Xiu (2023) demonstrate that convolutional neural networks (CNNs) trained directly on binary stock price-and-volume chart images generate economically substantial out-of-sample return forecasts (``Visual Alpha''). Yet from a statistical machine learning perspective, why high-capacity vision architectures succeed in an environment characterized by extreme aleatoric noise ($\text{accuracy} \approx 52\%$) and structural non-stationarity remains insufficiently understood. Using a panel of $2,196,994$ monthly U.S.\ equity chart observations from 1993 to 2019, we build a unified benchmark split by chart date and conduct a four-stage diagnostic audit across the machine learning pipeline: (1) architectural inductive bias and spatial component masking, (2) supervision noise under near-zero return margins and prediction horizons, (3) probability calibration and selective tail prediction, and (4) temporal concept drift and Grad-CAM visual attribution. Our baseline replication confirms that a $708\text{K}$-parameter 2D-CNN trained strictly on 1993--1999 charts achieves a persistent 2000--2019 out-of-sample equal-weighted long-short decile Sharpe ratio of $1.74 \pm 0.19$ across five seeds ($1.68$ for the 5-seed ensemble, $+22.33\%$ annualized spread, $t = 7.51$). Further, deep ensembling cuts expected calibration error by $51.2\%$ ($0.0215 \to 0.0105$) and elevates directional accuracy monotonically from $52.50\%$ at full market coverage to $57.40\%$ in the top-$5\%$ confidence tail, explaining how modest full-sample classification edges translate into strong cross-sectional portfolio performance. Excluding training returns below 5\% in magnitude reduced test AUC from 0.5322 to 0.5170, while retaining all charts and smoothing labels reduced calibration error from 0.0166 to 0.0137. \textit{[Add RQ1 and RQ4 findings at integration.]}
 \end{abstract}
 
 % =============================================================================
@@ -112,12 +112,25 @@ Every model across Sections 2--6 is evaluated via four complementary metrics: (1
 }
 
 % =============================================================================
-% SECTION 4: RQ2 SLOT (Member C)
+% SECTION 4: RQ2 (Member C)
 % =============================================================================
-\section{RQ2: Supervision under Low SNR --- Margin Filtering and Horizon}
-\teammatebox{Member C --- Section 4 ($\approx 1.3$ pages, includes Figure 2)}{%
-  \textbf{Planned Content:} Empirical bias--variance audit of aleatoric label noise around zero return. Evaluates training-only margin filtering $|\text{Retx}_{20d}| \ge \tau$ for $\tau \in \{0\%, 1\%, 3\%, 5\%\}$, volatility-standardized filtering $|\text{Retx\_20d\_tstat}| \ge 0.5$, and label smoothing ($\varepsilon = 0.1$) on the untouched 2000--2019 OOS test universe, alongside predictability decay across 5-day, 20-day, and 60-day return horizons.%
-}
+\section{RQ2: Does filtering near-zero returns improve supervision?}
+\label{sec:sq2}
+A return just above zero receives the opposite label to one just below it. We tested whether removing these cases during training improves prediction on future charts. We reused the seed-42 baseline (C0) and trained the same CNN on progressively larger absolute 20-day ex-dividend returns (C1--C3). C4 used the supplied volatility-standardized return with $|t|\geq 0.5$. C5 retained all training charts and assigned probability 0.95 to the observed class. Validation used hard-label cross-entropy (CE) throughout. All six models faced the same 1,491,887 test charts.
+
+\ifnum\value{figure}=0\setcounter{figure}{1}\fi % Figure 1 belongs to pending RQ1.
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=\linewidth]{../outputs/figures/fig2_sq2_noise_horizon.pdf}
+  \caption{\textbf{Training filters and forecast horizons, 2000--2019.} (a) Absolute return thresholds and a separate volatility-standardized filter. Retention is relative to 482,926 training charts. (b) Accuracy and mean top-minus-bottom decile holding-period return on 1,471,746 charts with valid targets at all three horizons. The smoothing comparison uses the full 20-day test set.}
+  \label{fig:sq2}
+\end{figure}
+
+\textbf{Filtering weakened ranking.} As the threshold rose from 0 to 1, 3 and 5\%, test AUC fell at every step (Figure~\ref{fig:sq2}a). At 5\%, the model retained 58.6\% of training charts. Accuracy fell from 52.33\% to 51.34\%, CE rose from 0.6924 to 0.7131, and calibration error (ECE) rose from 0.0166 to 0.0786. The standardized filter retained 94.4\% and gave an AUC of 0.5283. The 5\% filter kept 70.9\% of the smallest and 53.0\% of the largest capitalization quintile among 445,641 training charts with positive recorded capitalization. The source also contains 37,285 negative values, excluded only from this size diagnostic. Changes in sample size and stock mix limit causal interpretation.
+
+\textbf{Average spread and Sharpe gave different answers.} At the 3\% threshold, AUC fell by 0.0062 and Sharpe rose by 0.07. Yet the mean monthly long--short spread fell by 0.373 percentage points (pp). Its paired 95\% interval was $[-0.603,-0.179]$ pp, using 2,000 moving-block resamples of three consecutive months from the 240 paired monthly spreads. With label smoothing, CE fell by 0.00030 and ECE by 0.00286. The mean spread changed by $+0.023$ pp (95\% interval $[-0.108,+0.164]$ pp). These intervals describe variation across months for the fitted models. Each variant was trained once, and the reused baseline need not share its initial weights.
+
+\textbf{The strongest horizon depended on the metric.} On matched charts, 60 days gave the highest accuracy (52.52\%) and the highest up-label frequency (51.51\%). At 5, 20 and 60 days, AUC was 0.5298, 0.5315 and 0.5296, respectively. The 20-day model also had the largest mean holding-period spread (1.73\%, versus 1.04\% and 1.62\%). Signals occur once a month and 60-day holdings overlap. Returns therefore cover different lengths of time. Splitting by chart date also allows late-1999 forward labels to extend into 2000.
 
 % =============================================================================
 % SECTION 5: RQ3 CALIBRATION & SELECTIVE PREDICTION (Member A — COMPLETE)
@@ -185,18 +198,18 @@ Table~\ref{tab:sq3} and Figure~\ref{fig:sq3} yield three key statistical insight
 \section{Conclusion, Team Contributions, and AI Usage Disclosure}
 
 \subsection{Conclusion and Limitations}
-By auditing chart-based return CNNs across architecture, supervision, calibration, and temporal deployment, we show that Visual Alpha is statistically real and persistent over two decades of U.S.\ equity data, yet governed by tight bias--variance and low-SNR constraints. Deep ensembling substantially improves both ranking quality and probability calibration without post-hoc rescaling fragility, while selective tail prediction bridges the gap between $52.5\%$ overall classification accuracy and $1.7+$ portfolio Sharpe ratios. \textit{[Placeholder: Append 2 synthesizing sentences integrating final RQ1, RQ2, and RQ4 empirical conclusions.]} Key limitations include equal-weighted portfolio construction without bid-ask transaction cost deductions and monthly snapshot rebalancing; incorporating turnover-penalized portfolio optimization represents a promising direction for future work.
+By auditing chart-based return CNNs across architecture, supervision, calibration, and temporal deployment, we show that Visual Alpha is statistically real and persistent over two decades of U.S.\ equity data, yet governed by tight bias--variance and low-SNR constraints. Deep ensembling substantially improves both ranking quality and probability calibration without post-hoc rescaling fragility, while selective tail prediction bridges the gap between $52.5\%$ overall classification accuracy and $1.7+$ portfolio Sharpe ratios. In the single-seed supervision comparison, keeping near-zero training returns preserved ranking quality, and smoothing all binary targets modestly improved calibration. \textit{[Add RQ1 and RQ4 findings at integration.]} Key limitations include equal-weighted portfolio construction without bid-ask transaction cost deductions and monthly snapshot rebalancing; incorporating turnover-penalized portfolio optimization represents a promising direction for future work.
 
 \subsection*{Team Member Contributions}
 \begin{itemize}[leftmargin=1.5em,itemsep=1pt,topsep=2pt]
   \item \textbf{Hanchong Qiu (Team Leader, Member A):} Designed overall four-stage research architecture and engineering contracts; implemented the shared \texttt{visual\_alpha} memory-mapped package and unified evaluator; executed 5-seed Baseline CNN replication and RQ3 calibration/selective-prediction experiments; authored Sections 1, 2, and 5.
   \item \textbf{[Member B Name] (Member B):} Implemented RQ1 cross-family inductive bias models (PCA+LR, LightGBM, 1D-CNN, ResNet) and spatial masking ablations; generated Table 2 and Figure 1; authored Section 3.
-  \item \textbf{[Member C Name] (Member C):} Implemented RQ2 margin-filtering ($\tau$ and $t$-stat thresholds), label smoothing, and multi-horizon (5d/20d/60d) experiments; generated Figure 2; authored Section 4.
+  \item \textbf{Dongqing Zhao (Member C):} Implemented RQ2 margin-filtering ($\tau$ and $t$-stat thresholds), label smoothing, and multi-horizon (5d/20d/60d) experiments; compared matched horizons and paired monthly returns, produced Figure~\ref{fig:sq2}, and wrote Section~\ref{sec:sq2}.
   \item \textbf{[Member D Name] (Member D):} Implemented RQ4 modern retraining concept-drift experiments and individual/aggregate Grad-CAM visual attribution; generated Table 3 and Figure 4; authored Abstract, Section 6, Section 7, and coordinated final manuscript \& presentation integration.
 \end{itemize}
 
 \subsection*{Statement on AI and Large Language Model Usage}
-In accordance with MSDM 5054 course policy, we disclose the use of AI assistance (GitHub Copilot Agent in VS Code) during this project: (1) assisting with Python environment configuration (\texttt{uv}), memory-mapped \texttt{np.memmap} data-loader scaffolding, and PyTorch/Matplotlib boilerplate code; (2) diagnosing platform-specific runtime issues on Apple Silicon (\texttt{mps} backend and OpenMP library ordering); and (3) polishing academic English phrasing and \LaTeX{} table formatting. All experimental hypotheses, dataset schema verifications (including the $\text{Retx}_{20d}$ vs.\ $\text{Ret}_{20d}$ alignment audit), model training runs, quantitative metrics, and scientific interpretations were independently executed and verified by the team members, who take full responsibility for the integrity of this report. \textit{[Update with teammates' AI log entries prior to submission.]}
+In accordance with MSDM 5054 course policy, we disclose the use of AI assistance (GitHub Copilot Agent in VS Code) during this project: (1) assisting with Python environment configuration (\texttt{uv}), memory-mapped \texttt{np.memmap} data-loader scaffolding, and PyTorch/Matplotlib boilerplate code; (2) diagnosing platform-specific runtime issues on Apple Silicon (\texttt{mps} backend and OpenMP library ordering); and (3) polishing academic English phrasing and \LaTeX{} table formatting. For RQ2, OpenCode assisted with experiment implementation and execution. OpenAI Codex assisted with the evaluation plan, prediction checks, statistical interpretation, figure, manuscript, and presentation. Section~\ref{sec:sq2} reports metrics computed from saved model predictions. \textit{[Update with teammates' AI log entries prior to submission.]}
 
 \begin{thebibliography}{9}
 \small

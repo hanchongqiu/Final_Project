@@ -8,15 +8,15 @@ horizon (5d / 60d). All other hyperparameters are locked (split seed 42, train s
 called BEFORE `CNN20D()` construction for C1–C7).
 
 Usage:
-    # Smoke test a single configuration (1 epoch):
+    # Smoke test only in a separate checkout with its own outputs directory:
     CUDA_VISIBLE_DEVICES=0 .venv/bin/python experiments/exp_sq2_label_noise.py \
         --exp C2 --max-epochs 1
 
     # Full matrix, two GPUs in parallel:
     CUDA_VISIBLE_DEVICES=0 .venv/bin/python experiments/exp_sq2_label_noise.py \
-        --exp C1,C2,C3,C4 > logs/sq2_gpu0.log 2>&1 &
+        --train-only --exp C1,C2,C3,C4 > logs/sq2_gpu0.log 2>&1 &
     CUDA_VISIBLE_DEVICES=1 .venv/bin/python experiments/exp_sq2_label_noise.py \
-        --exp C5,C6,C7 > logs/sq2_gpu1.log 2>&1 &
+        --train-only --exp C5,C6,C7 > logs/sq2_gpu1.log 2>&1 &
     wait
 
     # Rebuild every table & figure from saved predictions + manifest (no training):
@@ -45,6 +45,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
+from filelock import FileLock
 
 from visual_alpha import (
     CHECKPOINTS_DIR,
@@ -209,6 +210,8 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Only rebuild tables & figure from saved predictions + manifest; no training.",
     )
+    parser.add_argument("--train-only", action="store_true",
+                        help="Save each run without writing shared aggregate tables or figures.")
     parser.add_argument("--max-epochs", type=int, default=15, help="Max training epochs.")
     parser.add_argument("--patience", type=int, default=2, help="Early-stopping patience.")
     parser.add_argument("--lr", type=float, default=1e-5, help="Adam learning rate.")
@@ -267,9 +270,13 @@ def get_unfiltered_splits(horizon: str) -> SplitDatasets:
 def append_manifest_rows(rows: list[dict[str, object]]) -> None:
     """Append run-metadata rows to outputs/tables/sq2_run_manifest.csv (write header if new)."""
     new = pd.DataFrame(rows, columns=MANIFEST_COLUMNS)
-    if MANIFEST_PATH.exists():
-        new = pd.concat([pd.read_csv(MANIFEST_PATH), new], ignore_index=True)
-    new.to_csv(MANIFEST_PATH, index=False)
+    # Two GPU workers finish independently. Publish a complete CSV under a lock.
+    with FileLock(str(MANIFEST_PATH) + ".lock"):
+        if MANIFEST_PATH.exists():
+            new = pd.concat([pd.read_csv(MANIFEST_PATH), new], ignore_index=True)
+        tmp = MANIFEST_PATH.with_suffix(".tmp")
+        new.to_csv(tmp, index=False)
+        tmp.replace(MANIFEST_PATH)
 
 
 def load_manifest() -> pd.DataFrame:
@@ -615,7 +622,9 @@ def build_cap_retention_table() -> pd.DataFrame:
     """Table 5 — C1–C4 retention by C0 training-pool MarketCap quintile (Q1=small)."""
     pool = get_unfiltered_splits("20d").train.metadata
     meta = pool[["MarketCap", "Retx_20d", "Retx_20d_tstat"]].copy()
-    # rank(method="first") guarantees unique qcut edges on float32 market caps
+    # The source contains signed values with undocumented sign semantics.
+    # Limit this size diagnostic to observed, positive capitalizations.
+    meta = meta.loc[np.isfinite(meta["MarketCap"]) & (meta["MarketCap"] > 0)].copy()
     meta["cap_quintile"] = pd.qcut(
         meta["MarketCap"].rank(method="first"), q=5, labels=["Q1", "Q2", "Q3", "Q4", "Q5"]
     )
@@ -706,121 +715,64 @@ def build_bootstrap_table(
     return pd.DataFrame(rows)
 
 
-def plot_figure2(main: pd.DataFrame) -> None:
-    """Figure 2 — (a) margin-filtering trade-off; (b) horizon & label smoothing."""
-    sns.set_theme(style="whitegrid", context="paper", font_scale=1.15)
-    palette = sns.color_palette("colorblind")
-    idx = main.set_index("exp_id")
-
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.1), dpi=300)
-
-    # Panel (a): margin filtering trade-off (tau = 0/1/3/5% + C4 as separate hollow point)
-    tau_points = [("C0", 0.0, "0%"), ("C1", 1.0, "1%"), ("C2", 3.0, "3%"), ("C3", 5.0, "5%")]
-    pts = [(tau, idx.loc[exp_id], lab) for exp_id, tau, lab in tau_points if exp_id in idx.index]
-    x_tau = [p[0] for p in pts]
-    has_c4 = "C4" in idx.index
-    x_c4 = 6.4
-
-    ax_ret = ax1.twinx()
-    ax_ret.bar(
-        x_tau,
-        [float(r["retention_pct"]) for _, r, _ in pts],
-        width=0.85,
-        alpha=0.22,
-        color="0.55",
-        label="Train retention (right)",
-        zorder=1,
-    )
-    if has_c4:
-        ax_ret.bar(
-            [x_c4], [float(idx.loc["C4", "retention_pct"])],
-            width=0.85, alpha=0.22, color="0.55", zorder=1,
-        )
-    ax_ret.set_ylabel("Train Retention (%)", color="0.35", fontsize=9.5)
-    ax_ret.set_ylim(0, 108)
-    ax_ret.tick_params(axis="y", colors="0.35", labelsize=8.5)
-    ax_ret.grid(False)
-
-    ax1.set_zorder(ax_ret.get_zorder() + 1)
-    ax1.patch.set_visible(False)
-    line_auc, = ax1.plot(
-        x_tau, [float(r["auc"]) for _, r, _ in pts], marker="o", ms=5.5, lw=1.8,
-        color=palette[0], label="AUC (left)",
-    )
-    line_sr, = ax1.plot(
-        x_tau, [float(r["ls_sharpe"]) for _, r, _ in pts], marker="s", ms=5.5, lw=1.8,
-        color=palette[3], label="LS Sharpe (left)",
-    )
-    if has_c4:
-        r4 = idx.loc["C4"]
-        ax1.plot([x_c4], [float(r4["auc"])], marker="o", ms=9, lw=0,
-                 mfc="none", mec=palette[0], mew=1.8)
-        ax1.plot([x_c4], [float(r4["ls_sharpe"])], marker="s", ms=9, lw=0,
-                 mfc="none", mec=palette[3], mew=1.8)
-        ax1.axvline(5.7, linestyle=":", color="0.6", lw=1.0)
-        ax1.annotate(
-            f"C4: |t-stat|≥0.5\nretention {float(r4['retention_pct']):.1f}%\n"
-            f"AUC {float(r4['auc']):.4f}, Sharpe {float(r4['ls_sharpe']):.2f}",
-            xy=(x_c4, float(r4["auc"])),
-            xytext=(4.35, float(r4["ls_sharpe"])),
-            fontsize=7.8,
-            color="0.25",
-            arrowprops={"arrowstyle": "-", "color": "0.5", "lw": 0.8},
-        )
-    xticks = x_tau + ([x_c4] if has_c4 else [])
-    xlabels = [p[2] for p in pts] + (["|t|≥0.5"] if has_c4 else [])
-    ax1.set_xticks(xticks)
-    ax1.set_xticklabels(xlabels)
-    ax1.set_xlim(-0.6, 7.6 if has_c4 else 5.6)
-    ax1.set_xlabel("Margin filter threshold $\\tau$ on $|Retx_{20d}|$")
-    ax1.set_ylabel("AUC / LS Sharpe")
-    ax1.set_title("(a) Margin Filtering Trade-off", fontweight="bold")
-    handles = [line_auc, line_sr] + ax_ret.get_legend_handles_labels()[0]
-    ax1.legend(handles=handles, loc="lower left", frameon=True, fontsize=8.3)
-
-    # Panel (b): horizon & label smoothing
-    hz_points = [("C6", "5d", 5), ("C0", "20d", 20), ("C7", "60d", 60)]
-    pts_b = [(x, idx.loc[exp_id], lab) for exp_id, lab, x in hz_points if exp_id in idx.index]
-    x_hz = [p[0] for p in pts_b]
-    line_acc, = ax2.plot(
-        x_hz, [float(r["accuracy_pct"]) for _, r, _ in pts_b], marker="o", ms=5.5,
-        lw=1.8, color=palette[0], label="Accuracy (left)",
-    )
-    ax_ret2 = ax2.twinx()
-    line_ls, = ax_ret2.plot(
-        x_hz, [float(r["ls_mean_ret_pct"]) for _, r, _ in pts_b], marker="^", ms=6,
-        lw=1.8, color=palette[1], label="Mean LS return /period % (right)",
-    )
-    ax_ret2.set_ylabel("Mean Long-Short Return per Period (%)", color="0.3", fontsize=9.5)
-    ax_ret2.tick_params(axis="y", colors="0.3", labelsize=8.5)
-    ax_ret2.grid(False)
-    ax2.set_xticks([5, 20, 60])
-    ax2.set_xticklabels(["5d", "20d", "60d"])
-    ax2.set_xlabel("Prediction Horizon (trading days; signals monthly)")
-    ax2.set_ylabel("OOS Directional Accuracy (%)")
-    ax2.set_title("(b) Horizon & Label Smoothing", fontweight="bold")
-    ax2.legend(handles=[line_acc, line_ls], loc="upper left", frameon=True, fontsize=8.3)
-    if "C5" in idx.index and "C0" in idx.index:
-        ax2.text(
-            0.97,
-            0.04,
-            f"Label smoothing: CE {float(idx.loc['C0', 'ce_loss']):.4f}"
-            f"$\\rightarrow${float(idx.loc['C5', 'ce_loss']):.4f}, "
-            f"ECE {float(idx.loc['C0', 'ece']):.4f}"
-            f"$\\rightarrow${float(idx.loc['C5', 'ece']):.4f}",
-            transform=ax2.transAxes,
-            ha="right",
-            va="bottom",
-            fontsize=8.3,
-            bbox={"boxstyle": "round,pad=0.3", "fc": "white", "ec": "0.7", "alpha": 0.9},
-        )
-
-    fig.tight_layout()
-    for ext in ("pdf", "png"):
-        out_file = FIGURES_DIR / f"fig2_sq2_noise_horizon.{ext}"
-        fig.savefig(out_file, dpi=300, bbox_inches="tight")
-        print(f"Saved {out_file}")
-    plt.close(fig)
+def plot_figure2(main: pd.DataFrame, common: pd.DataFrame) -> None:
+    """Full 20d test panel on the left, matched horizon panel on the right."""
+    full = main.set_index("exp_id")
+    horizons = common.set_index("horizon").loc[["5d", "20d", "60d"]]
+    margin = full.loc[["C0", "C1", "C2", "C3", "C4"]]
+    navy, teal = "#254e70", "#117668"
+    with sns.axes_style("ticks"):
+        fig, axes = plt.subplots(3, 2, figsize=(9.8, 4.35), layout="constrained")
+        axes[0, 0].set_title("(a)  Training-only return filters", loc="left", weight="bold")
+        axes[0, 1].set_title("(b)  Horizon on matched charts", loc="left", weight="bold")
+        for ax, metric, label, fmt in zip(
+            axes[:, 0], ["retention_pct", "auc", "ls_sharpe"],
+            ["Train kept (%)", "Test AUC", "L–S Sharpe"], [".1f", ".4f", ".2f"],
+        ):
+            values = margin[metric].to_numpy()
+            ax.set_xlim(-0.5, 4.65)
+            if metric == "retention_pct":
+                ax.bar(range(5), values, color="#a4b9c5", width=0.55)
+                ax.set_ylim(0, 137)
+            else:
+                ax.plot(range(4), values[:4], "o-", color=navy, lw=1.6, ms=4)
+                ax.plot(4, values[4], "o", color=navy, mfc="white", ms=5)
+                span = values.max() - values.min()
+                ax.set_ylim(values.min() - 0.27 * span, values.max() + 0.65 * span)
+            ax.axvline(3.5, ls=":", lw=1, color="0.70")
+            for x, val in enumerate(values):
+                ax.annotate(format(val, fmt), (x, val), xytext=(0, 5),
+                            textcoords="offset points", ha="center", fontsize=8)
+            ax.set_ylabel(label, fontsize=9)
+            ax.set_xticks(range(5), ["0%", "1%", "3%", "5%", "|t| ≥ 0.5"])
+        for ax, metric, label in zip(axes[:2, 1], ["accuracy_pct", "ls_mean_ret_pct"],
+                                     ["Accuracy (%)", "L–S return (%)"]):
+            values = horizons[metric].to_numpy()
+            ax.plot(range(3), values, "o-", color=teal, lw=1.6, ms=4)
+            for x, val in enumerate(values):
+                ax.annotate(f"{val:.2f}", (x, val), xytext=(0, 5),
+                            textcoords="offset points", ha="center", fontsize=8)
+            span = values.max() - values.min()
+            ax.set_ylim(values.min() - 0.25 * span, values.max() + 0.65 * span)
+            ax.set_xlim(-0.35, 2.35)
+            ax.set_xticks(range(3), ["5 days", "20 days", "60 days"])
+            ax.set_ylabel(label, fontsize=9)
+        for ax in axes.flat:
+            sns.despine(ax=ax)
+            ax.tick_params(labelsize=8, length=2)
+        for ax in axes[:2, 0]:
+            ax.tick_params(labelbottom=False)
+        axes[0, 1].tick_params(labelbottom=False)
+        axes[2, 1].axis("off")
+        axes[2, 1].text(0.02, 0.78, "20-day label smoothing on the full test set",
+                        transform=axes[2, 1].transAxes, fontsize=10, weight="bold")
+        for y, col, name in [(0.42, "ce_loss", "Cross-entropy"), (0.09, "ece", "Calibration error")]:
+            axes[2, 1].text(0.02, y,
+                            f"{name}    {full.loc['C0', col]:.4f}  →  {full.loc['C5', col]:.4f}",
+                            transform=axes[2, 1].transAxes, fontsize=9)
+        for ext in ("pdf", "png"):
+            fig.savefig(FIGURES_DIR / f"fig2_sq2_noise_horizon.{ext}", dpi=300)
+        plt.close(fig)
 
 
 def print_key_comparisons(
@@ -905,8 +857,8 @@ def build_outputs(device: torch.device) -> tuple[pd.DataFrame, pd.DataFrame | No
         print(f"\nSaved paired moving-block bootstrap table to {boot_path}:")
         print(boot.to_string(index=False, float_format=lambda v: f"{v:.4f}"))
 
-    if not main.empty:
-        plot_figure2(main)
+    if common is not None and set(SQ2_EXPERIMENTS) <= set(main["exp_id"]):
+        plot_figure2(main, common)
     print_key_comparisons(main, common)
     return main, common
 
@@ -932,7 +884,8 @@ def main() -> None:
             ensure_c0_ready(force=args.force, eval_batch_size=args.eval_batch_size, device=device)
         else:
             run_training_experiment(SQ2_EXPERIMENTS[exp_id], args, device)
-    build_outputs(device)
+    if not args.train_only:
+        build_outputs(device)
 
 
 if __name__ == "__main__":
