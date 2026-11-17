@@ -1,0 +1,111 @@
+=== SQ2 Label Noise & Horizon Matrix | Device: cuda | Experiments: ['C2', 'C1', 'C4', 'C7'] ===
+
+--- C2 (c2_margin_tau003) | horizon=20d | rule: abs(Retx_20d) >= 0.03 ---
+  Train=349,785 (72.43% of 482,926 same-horizon pool) | pos_rate=0.4845 | Val=206,968 | Test=1,491,887
+  [Epoch 01/15]* train_loss=1.0221 (50.50%) | val_loss=0.7262 (51.76%) | 43.0s
+  [Epoch 02/15]* train_loss=0.9134 (51.32%) | val_loss=0.7084 (52.56%) | 43.0s
+  [Epoch 03/15]  train_loss=0.8525 (51.50%) | val_loss=0.7100 (51.70%) | 43.2s
+  [Epoch 04/15]* train_loss=0.8053 (51.99%) | val_loss=0.6990 (52.52%) | 43.5s
+  [Epoch 05/15]* train_loss=0.7731 (52.29%) | val_loss=0.6933 (53.42%) | 43.6s
+  [Epoch 06/15]* train_loss=0.7508 (52.50%) | val_loss=0.6919 (53.64%) | 43.8s
+  [Epoch 07/15]  train_loss=0.7343 (52.75%) | val_loss=0.6991 (52.00%) | 43.8s
+  [Epoch 08/15]  train_loss=0.7236 (52.98%) | val_loss=0.6970 (52.18%) | 43.8s
+  Early stopping triggered at epoch 8 (best epoch=6, best val_loss=0.6919).
+  Saved val/test predictions in 55.7s | total wall time 403.9s (best epoch 6, best val_loss 0.6919)
+  [C2 OOS 2000-2019] Acc=51.46% | CE=0.6987 | AUC=0.5259 | ECE=0.0454 | LS Sharpe=1.76 (t=7.89) | meanLS/period=1.403%
+
+--- C1 (c1_margin_tau001) | horizon=20d | rule: abs(Retx_20d) >= 0.01 ---
+  Train=429,880 (89.02% of 482,926 same-horizon pool) | pos_rate=0.4860 | Val=206,968 | Test=1,491,887
+  [Epoch 01/15]* train_loss=1.0073 (50.71%) | val_loss=0.7198 (51.83%) | 51.9s
+  [Epoch 02/15]* train_loss=0.8935 (51.16%) | val_loss=0.7083 (52.63%) | 51.4s
+  [Epoch 03/15]* train_loss=0.8255 (51.52%) | val_loss=0.6988 (53.08%) | 51.3s
+  [Epoch 04/15]* train_loss=0.7822 (51.69%) | val_loss=0.6942 (53.38%) | 51.2s
+  [Epoch 05/15]* train_loss=0.7529 (51.95%) | val_loss=0.6910 (53.44%) | 51.2s
+  [Epoch 06/15]* train_loss=0.7327 (52.35%) | val_loss=0.6903 (53.69%) | 51.2s
+  [Epoch 07/15]* train_loss=0.7200 (52.75%) | val_loss=0.6887 (53.78%) | 51.2s
+  [Epoch 08/15]  train_loss=0.7123 (52.85%) | val_loss=0.6938 (52.47%) | 51.2s
+  [Epoch 09/15]  train_loss=0.7052 (53.30%) | val_loss=0.6908 (53.65%) | 51.2s
+  Early stopping triggered at epoch 9 (best epoch=7, best val_loss=0.6887).
+  Saved val/test predictions in 54.5s | total wall time 515.5s (best epoch 7, best val_loss 0.6887)
+  [C1 OOS 2000-2019] Acc=52.13% | CE=0.6940 | AUC=0.5303 | ECE=0.0265 | LS Sharpe=1.80 (t=8.05) | meanLS/period=1.610%
+
+--- C4 (c4_tstat05) | horizon=20d | rule: abs(Retx_20d_tstat) >= 0.5 ---
+  Train=455,654 (94.35% of 482,926 same-horizon pool) | pos_rate=0.4870 | Val=206,968 | Test=1,491,887
+  [Epoch 01/15]* train_loss=1.0068 (50.54%) | val_loss=0.7183 (51.85%) | 53.9s
+  [Epoch 02/15]* train_loss=0.8890 (51.03%) | val_loss=0.7028 (52.23%) | 53.7s
+  [Epoch 03/15]* train_loss=0.8203 (51.44%) | val_loss=0.6960 (52.74%) | 53.8s
+  [Epoch 04/15]* train_loss=0.7764 (51.61%) | val_loss=0.6925 (53.42%) | 53.7s
+  [Epoch 05/15]* train_loss=0.7486 (51.87%) | val_loss=0.6923 (53.25%) | 53.7s
+  [Epoch 06/15]* train_loss=0.7302 (52.10%) | val_loss=0.6890 (53.79%) | 53.7s
+  [Epoch 07/15]* train_loss=0.7182 (52.46%) | val_loss=0.6886 (53.76%) | 53.8s
+  [Epoch 08/15]  train_loss=0.7100 (52.75%) | val_loss=0.6896 (53.80%) | 54.0s
+  [Epoch 09/15]  train_loss=0.7036 (53.15%) | val_loss=0.6907 (52.98%) | 53.8s
+  Early stopping triggered at epoch 9 (best epoch=7, best val_loss=0.6886).
+  Saved val/test predictions in 54.2s | total wall time 537.5s (best epoch 7, best val_loss 0.6886)
+  [C4 OOS 2000-2019] Acc=51.68% | CE=0.6942 | AUC=0.5283 | ECE=0.0262 | LS Sharpe=1.58 (t=7.08) | meanLS/period=1.593%
+
+--- C7 (c7_horizon60d) | horizon=60d | rule: none (full sample; 60d labels) ---
+  Train=475,880 (100.00% of 475,880 same-horizon pool) | pos_rate=0.5069 | Val=203,949 | Test=1,471,746
+  [Epoch 01/15]* train_loss=1.0068 (50.39%) | val_loss=0.7252 (51.50%) | 55.7s
+  [Epoch 02/15]  train_loss=0.8847 (50.84%) | val_loss=0.7266 (51.30%) | 55.5s
+  [Epoch 03/15]* train_loss=0.8157 (51.00%) | val_loss=0.6975 (51.97%) | 55.5s
+  [Epoch 04/15]* train_loss=0.7711 (51.31%) | val_loss=0.6934 (52.58%) | 55.5s
+  [Epoch 05/15]* train_loss=0.7444 (51.59%) | val_loss=0.6932 (52.77%) | 55.5s
+  [Epoch 06/15]* train_loss=0.7282 (51.73%) | val_loss=0.6907 (52.88%) | 55.5s
+  [Epoch 07/15]  train_loss=0.7172 (52.03%) | val_loss=0.7022 (51.06%) | 55.5s
+  [Epoch 08/15]* train_loss=0.7105 (52.14%) | val_loss=0.6904 (53.05%) | 55.5s
+  [Epoch 09/15]  train_loss=0.7039 (52.61%) | val_loss=0.6992 (51.69%) | 55.5s
+  [Epoch 10/15]* train_loss=0.7010 (52.75%) | val_loss=0.6901 (53.25%) | 55.5s
+  [Epoch 11/15]* train_loss=0.6976 (53.04%) | val_loss=0.6894 (53.40%) | 55.5s
+  [Epoch 12/15]  train_loss=0.6951 (53.40%) | val_loss=0.6895 (53.46%) | 55.5s
+  [Epoch 13/15]* train_loss=0.6932 (53.61%) | val_loss=0.6891 (53.56%) | 55.5s
+  [Epoch 14/15]* train_loss=0.6914 (54.01%) | val_loss=0.6889 (53.52%) | 55.5s
+  [Epoch 15/15]  train_loss=0.6900 (54.24%) | val_loss=0.6900 (53.29%) | 55.5s
+  [fallback xcheck C7] filled 1,214 missing Ret_60d from Retx_60d (no NaN left); decile summary matches direct fallback call (max diff 0.00e+00) — OK
+  Saved val/test predictions in 53.7s | total wall time 885.5s (best epoch 14, best val_loss 0.6889)
+  [C7 OOS 2000-2019] Acc=52.52% | CE=0.6926 | AUC=0.5296 | ECE=0.0190 | LS Sharpe=1.23 (t=5.49) | meanLS/period=1.622%
+
+=== Building SQ2 tables & figure from saved predictions ===
+  [fallback xcheck C6] filled 1,218 missing Ret_5d from Retx_5d (no NaN left); decile summary matches direct fallback call (max diff 0.00e+00) — OK
+  [fallback xcheck C7] filled 1,214 missing Ret_60d from Retx_60d (no NaN left); decile summary matches direct fallback call (max diff 0.00e+00) — OK
+  [fallback xcheck C6] filled 1,218 missing Ret_5d from Retx_5d (no NaN left); decile summary matches direct fallback call (max diff 0.00e+00) — OK
+  [fallback xcheck C7] filled 1,214 missing Ret_60d from Retx_60d (no NaN left); decile summary matches direct fallback call (max diff 0.00e+00) — OK
+
+Saved main table to /home/zdq/桌面/Final_Project/outputs/tables/sq2_noise_and_horizon.csv:
+exp_id               name horizon                                filter_rule  train_n  retention_pct  train_pos_rate  val_n  test_n  best_epoch  accuracy_pct  ce_loss    auc    ece  ls_sharpe  ls_tstat  ls_mean_ret_pct         eval_scope
+    C0        c0_baseline     20d none (full sample; reuse seed-42 baseline)   482926       100.0000          0.4868 206968 1491887          10       52.3322   0.6924 0.5322 0.0166     1.6962    7.5855           1.7764 full OOS 2000-2019
+    C1   c1_margin_tau001     20d                      abs(Retx_20d) >= 0.01   429880        89.0157          0.4860 206968 1491887           7       52.1350   0.6940 0.5303 0.0265     1.7999    8.0496           1.6097 full OOS 2000-2019
+    C2   c2_margin_tau003     20d                      abs(Retx_20d) >= 0.03   349785        72.4304          0.4845 206968 1491887           6       51.4591   0.6987 0.5259 0.0454     1.7641    7.8892           1.4035 full OOS 2000-2019
+    C3   c3_margin_tau005     20d                      abs(Retx_20d) >= 0.05   283161        58.6344          0.4869 206968 1491887           3       51.3353   0.7131 0.5170 0.0786     1.3509    6.0413           0.9674 full OOS 2000-2019
+    C4         c4_tstat05     20d                 abs(Retx_20d_tstat) >= 0.5   455654        94.3528          0.4870 206968 1491887           7       51.6816   0.6942 0.5283 0.0262     1.5836    7.0823           1.5931 full OOS 2000-2019
+    C5 c5_label_smooth010     20d                 none + label_smoothing=0.1   482926       100.0000          0.4868 206968 1491887          10       52.3463   0.6921 0.5324 0.0137     1.7370    7.7681           1.7997 full OOS 2000-2019
+    C6       c6_horizon5d      5d              none (full sample; 5d labels)   485346       100.0000          0.4914 208005 1498816           4       52.2791   0.6976 0.5299 0.0419     2.2414   10.0238           1.0740 full OOS 2000-2019
+    C7      c7_horizon60d     60d             none (full sample; 60d labels)   475880       100.0000          0.5069 203949 1471746          14       52.5163   0.6926 0.5296 0.0190     1.2282    5.4926           1.6218 full OOS 2000-2019
+  [fallback xcheck C6-common] filled 1,210 missing Ret_5d from Retx_5d (no NaN left); decile summary matches direct fallback call (max diff 0.00e+00) — OK
+  [fallback xcheck C7-common] filled 1,214 missing Ret_60d from Retx_60d (no NaN left); decile summary matches direct fallback call (max diff 0.00e+00) — OK
+
+Saved common-sample table to /home/zdq/桌面/Final_Project/outputs/tables/sq2_common_sample_horizon.csv:
+exp_id horizon  n_common  up_rate_pct  accuracy_pct  ce_loss    auc    ece  ls_sharpe  ls_tstat  ls_mean_ret_pct                               eval_scope
+    C6      5d   1471746      50.4550       52.2657   0.6976 0.5298 0.0420     2.2047    9.8595           1.0428 common sample (year,row_idx) of C6/C0/C7
+    C0     20d   1471746      50.5546       52.2843   0.6925 0.5315 0.0170     1.6599    7.4234           1.7326 common sample (year,row_idx) of C6/C0/C7
+    C7     60d   1471746      51.5052       52.5163   0.6926 0.5296 0.0190     1.2282    5.4926           1.6218 common sample (year,row_idx) of C6/C0/C7
+
+Saved filter-retention-by-cap table to /home/zdq/桌面/Final_Project/outputs/tables/sq2_filter_retention_by_cap.csv:
+cap_quintile  n_total  mean_market_cap  retention_c1_pct  retention_c2_pct  retention_c3_pct  retention_c4_pct
+  Q1 (small)    96586      -11702.7939           87.1596           75.7253           64.2795           90.0037
+          Q2    96585       35711.5781           90.7387           76.2520           63.3867           93.3333
+          Q3    96585      100239.2812           89.2064           70.8298           56.9540           94.7166
+          Q4    96585      300107.8125           88.8668           69.8266           55.4382           95.9321
+  Q5 (large)    96585     4821068.5000           89.1070           69.5180           53.1138           97.7781
+
+Saved paired moving-block bootstrap table to /home/zdq/桌面/Final_Project/outputs/tables/sq2_paired_bootstrap.csv:
+comparison  n_months  block_len  n_boot  obs_sharpe_diff  sharpe_diff_q2_5  sharpe_diff_q50  sharpe_diff_q97_5  obs_mean_ret_diff_pct  mean_ret_diff_q2_5_pct  mean_ret_diff_q50_pct  mean_ret_diff_q97_5_pct
+     C2-C0       240          3    2000          -0.7366           -1.1711          -0.7980            -0.4126                -0.3729                 -0.6030                -0.3821                  -0.1790
+     C5-C0       240          3    2000           0.0803           -0.4067           0.0892             0.5406                 0.0234                 -0.1081                 0.0260                   0.1644
+Saved /home/zdq/桌面/Final_Project/outputs/figures/fig2_sq2_noise_horizon.pdf
+Saved /home/zdq/桌面/Final_Project/outputs/figures/fig2_sq2_noise_horizon.png
+
+=== Key SQ2 comparisons ===
+  C2−C0 (margin τ=3%): ΔAUC = -0.0062 | ΔLS Sharpe = +0.07
+  C5−C0 (label smoothing 0.1): ΔCE = -0.0003 | ΔECE = -0.0029
+  Common-sample (1,471,746 imgs) accuracy ranking: C7/60d (52.52%) > C0/20d (52.28%) > C6/5d (52.27%)
