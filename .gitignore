@@ -12,6 +12,7 @@ __pycache__/
 img_data.zip
 data/monthly_20d/
 data/*.zip
+data/.sq2-downloads.*/
 data/*.dat
 data/*.feather
 
@@ -22,6 +23,9 @@ outputs/checkpoints/*.pkl
 outputs/predictions/*.parquet
 outputs/predictions/*.feather
 outputs/predictions/*.csv
+
+outputs/tables/sq2_run_manifest.csv.lock
+outputs/tables/sq2_run_manifest.tmp
 
 # Keep directory structure tracked
 !outputs/**/.gitkeep

@@ -35,7 +35,7 @@
 
 | 实验编号 | 实验组名称 | 训练集 (`1993–1999` 70% Train) 改动 | 监督标签列 | 目的说明 |
 | :--- | :--- | :--- | :---: | :--- |
-| **C0 (复用)** | **Baseline ($\tau = 0\%$)** | 不剔除（100% 训练样本，`482,925` 条） | `Retx_20d_label` | 直接复用组长跑好的 `baseline_seed42.parquet` |
+| **C0 (复用)** | **Baseline ($\tau = 0\%$)** | 不剔除（100% 训练样本，`482,926` 条） | `Retx_20d_label` | 直接复用组长跑好的 `baseline_seed42.parquet` |
 | **C1** | **Margin $\tau = 1\%$** | 仅保留 `abs(Retx_20d) >= 0.01` 的训练样本 | `Retx_20d_label` | 轻度剔除零附近极微弱噪声 |
 | **C2** | **Margin $\tau = 3\%$** | 仅保留 `abs(Retx_20d) >= 0.03` 的训练样本 | `Retx_20d_label` | 中度边际过滤 |
 | **C3** | **Margin $\tau = 5\%$** | 仅保留 `abs(Retx_20d) >= 0.05` 的训练样本 | `Retx_20d_label` | 激进过滤（观察样本量缩减与高波动小盘股偏移带来的方差效应） |
@@ -49,12 +49,12 @@
 
 ## 4. 你的交付物清单
 
-- [ ] 实验脚本：`experiments/exp_sq2_label_noise.py`
-- [ ] 汇总数据表：`outputs/tables/sq2_noise_and_horizon.csv`（记录每个 $\tau$ 下保留的训练样本数、保留比例、正样本比例，以及样本外 Accuracy、CE、AUC、ECE、LS Sharpe）
-- [ ] 论文插图 **`outputs/figures/fig2_sq2_noise_horizon.pdf` (& `.png`)**：
+- [x] 实验脚本：`experiments/exp_sq2_label_noise.py`
+- [x] 汇总数据表：`outputs/tables/sq2_noise_and_horizon.csv`（记录每个 $\tau$ 下保留的训练样本数、保留比例、正样本比例，以及样本外 Accuracy、CE、AUC、ECE、LS Sharpe）
+- [x] 论文插图 **`outputs/figures/fig2_sq2_noise_horizon.pdf` (& `.png`)**：
   * 左子图 **(a) Margin Filtering Trade-off**：横轴为阈值 $\tau \in \{0\%, 1\%, 3\%, 5\%\}$（附注 `t-stat >= 0.5` 点），左纵轴为 OOS LS Sharpe / AUC 折线，右纵轴背景柱状图为保留的有效训练样本比例（直观呈现 Bias-Variance 权衡）；
   * 右子图 **(b) Label Regularization & Horizon Decay**：展示 Label Smoothing 效果及同一 20d 图像在 `5d / 20d / 60d` 三个预测周期上的 OOS Accuracy 与多空单期收益/Sharpe 对比。
-- [ ] 报告撰写：完成英文报告 **Section 4 (RQ2: Supervision under Low SNR，约 1.3 页)** 初稿，并在 [REPORT_BLUEPRINT.md](../REPORT_BLUEPRINT.md) 登记 AI 使用记录。
+- [x] 报告撰写：完成英文报告 **Section 4 (RQ2: Supervision under Low SNR，约 1.3 页)** 初稿，并在 [REPORT_BLUEPRINT.md](../REPORT_BLUEPRINT.md) 登记 AI 使用记录。
 
 ---
 
