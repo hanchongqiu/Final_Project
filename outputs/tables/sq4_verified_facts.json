@@ -1,0 +1,38 @@
+{
+  "files_source": "SQ4_Complete_Results_Return.zip (uploaded by user)",
+  "modern_results": {
+    "Model_1990s": {
+      "n_samples": 472357.0,
+      "accuracy_pct": 51.740315058313946,
+      "ce_loss": 0.6939026511158195,
+      "auc": 0.5216821188007874,
+      "ece": 0.0227152973081409,
+      "ls_sharpe": 1.4978593836056355,
+      "ls_ann_ret_pct": 8.631242212884233
+    },
+    "Model_Modern": {
+      "n_samples": 472357.0,
+      "accuracy_pct": 51.66939412351251,
+      "ce_loss": 0.7048163571876087,
+      "auc": 0.5221821663513471,
+      "ece": 0.0605870793495467,
+      "ls_sharpe": 1.1692953141704865,
+      "ls_ann_ret_pct": 6.509775660320652
+    }
+  },
+  "n_gradcam": 2000,
+  "valid_gradcam": 2000,
+  "gradcam_groups": {
+    "Top1000_UP": 1000,
+    "Top1000_DOWN": 1000
+  },
+  "best_epoch": 11,
+  "target_layer": "CNN20D.block3[0]",
+  "roi_boundaries": {
+    "price_rows": "0:51",
+    "separator_row": "51",
+    "volume_rows": "52:64"
+  },
+  "test_years": "2013-2019",
+  "full_oos_n": 1491887
+}

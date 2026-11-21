@@ -1,0 +1,92 @@
+{
+  "raw_dir": "[USER_LOCAL_DATA_PATH]/img_data/monthly_20d",
+  "years": [
+    {
+      "year": 2006,
+      "image_rows": 80163,
+      "dat_bytes": 307825920,
+      "feather_bytes": 13481466
+    },
+    {
+      "year": 2007,
+      "image_rows": 81140,
+      "dat_bytes": 311577600,
+      "feather_bytes": 13638330
+    },
+    {
+      "year": 2008,
+      "image_rows": 78186,
+      "dat_bytes": 300234240,
+      "feather_bytes": 13064034
+    },
+    {
+      "year": 2009,
+      "image_rows": 70065,
+      "dat_bytes": 269049600,
+      "feather_bytes": 11865354
+    },
+    {
+      "year": 2010,
+      "image_rows": 68111,
+      "dat_bytes": 261546240,
+      "feather_bytes": 11616794
+    },
+    {
+      "year": 2011,
+      "image_rows": 67325,
+      "dat_bytes": 258528000,
+      "feather_bytes": 11305234
+    },
+    {
+      "year": 2012,
+      "image_rows": 66250,
+      "dat_bytes": 254400000,
+      "feather_bytes": 11193258
+    },
+    {
+      "year": 2013,
+      "image_rows": 65486,
+      "dat_bytes": 251466240,
+      "feather_bytes": 11078386
+    },
+    {
+      "year": 2014,
+      "image_rows": 67302,
+      "dat_bytes": 258439680,
+      "feather_bytes": 11452906
+    },
+    {
+      "year": 2015,
+      "image_rows": 68827,
+      "dat_bytes": 264295680,
+      "feather_bytes": 11698058
+    },
+    {
+      "year": 2016,
+      "image_rows": 68141,
+      "dat_bytes": 261661440,
+      "feather_bytes": 11495802
+    },
+    {
+      "year": 2017,
+      "image_rows": 67858,
+      "dat_bytes": 260574720,
+      "feather_bytes": 11432738
+    },
+    {
+      "year": 2018,
+      "image_rows": 68481,
+      "dat_bytes": 262967040,
+      "feather_bytes": 11572866
+    },
+    {
+      "year": 2019,
+      "image_rows": 68637,
+      "dat_bytes": 263566080,
+      "feather_bytes": 11434410
+    }
+  ],
+  "seed": 42,
+  "test_period": "2013-2019",
+  "train_val_period": "2006-2012"
+}

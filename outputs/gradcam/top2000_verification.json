@@ -1,0 +1,19 @@
+{
+  "n": 2000,
+  "group_counts": {
+    "Top1000_UP": 1000,
+    "Top1000_DOWN": 1000
+  },
+  "label_source": "baseline_seed42.parquet y_true",
+  "ranking_source": "All 1,491,887 OOS predictions, global top/bottom prob_up",
+  "probability_parity": {
+    "n": 2000,
+    "mae": 9.924808860892198e-08,
+    "max_abs_error": 5.107604217347017e-07,
+    "pearson": 0.9999999999997329,
+    "normalization": "uint8 / 255",
+    "architecture": "visual_alpha.models.CNN20D"
+  },
+  "checkpoint_best_epoch": 10,
+  "limitation": "Attributions are post-hoc, not evidence of causal market mechanisms."
+}

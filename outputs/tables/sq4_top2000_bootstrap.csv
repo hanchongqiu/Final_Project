@@ -1,0 +1,5 @@
+metric,up_mean,down_mean,up_minus_down,ci95_lower,ci95_upper,method
+price_share,0.9242680653035641,0.7780963042974472,0.14617176100611684,0.1381476365848612,0.15438001688470473,3-month circular block bootstrap across calendar months; observational cohort comparison
+volume_share,0.06862693885634508,0.20271061163162812,-0.13408367277528305,-0.14196516425383357,-0.1268333244409302,3-month circular block bootstrap across calendar months; observational cohort comparison
+recent_10d_share,0.49032713102176784,0.5296688106954097,-0.03934167967364188,-0.04919009933555694,-0.02941851149983961,3-month circular block bootstrap across calendar months; observational cohort comparison
+recent_5d_share,0.2795737381987274,0.27799466001987455,0.001579078178852833,-0.006937034458745379,0.009819717256802387,3-month circular block bootstrap across calendar months; observational cohort comparison

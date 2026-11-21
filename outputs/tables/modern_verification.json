@@ -1,0 +1,13 @@
+{
+  "full_original_training": true,
+  "n_training": 355293,
+  "n_validation": 152268,
+  "n_oos": 472357,
+  "seed": 42,
+  "init_seeded_before_model": true,
+  "best_epoch": 11,
+  "checkpoint": "outputs\\sq4_modern\\sq4_modern_seed42.pt",
+  "same_test_keys": true,
+  "same_y_true": true,
+  "device": "cpu"
+}

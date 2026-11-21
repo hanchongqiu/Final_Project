@@ -8,9 +8,9 @@
 
 \RequirePackage[
   letterpaper,
-  textwidth=5.5in,
-  textheight=9.0in,
-  top=1.0in,
+  textwidth=5.65in,
+  textheight=9.25in,
+  top=0.88in,
   centering
 ]{geometry}
 
@@ -21,21 +21,27 @@
 \RequirePackage{fancyhdr}
 
 \setlength{\parindent}{1em}
-\setlength{\parskip}{3.5pt plus 1pt minus 1pt}
-\renewcommand{\baselinestretch}{1.03}
+\setlength{\parskip}{1.8pt plus 0.5pt minus 0.5pt}
+\renewcommand{\baselinestretch}{0.96}
+
+\setlength{\textfloatsep}{6pt plus 1.5pt minus 1.5pt}
+\setlength{\floatsep}{5pt plus 1.5pt minus 1.5pt}
+\setlength{\intextsep}{6pt plus 1.5pt minus 1.5pt}
+\setlength{\abovecaptionskip}{2.5pt}
+\setlength{\belowcaptionskip}{0pt}
 
 % Section formatting matching NeurIPS
 \titleformat{\section}
-  {\large\bfseries}{\thesection}{0.75em}{}
-\titlespacing*{\section}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt minus 1pt}
+  {\large\bfseries}{\thesection}{0.7em}{}
+\titlespacing*{\section}{0pt}{6pt plus 1.5pt minus 1.5pt}{2pt plus 0.8pt minus 0.5pt}
 
 \titleformat{\subsection}
-  {\normalsize\bfseries}{\thesubsection}{0.6em}{}
-\titlespacing*{\subsection}{0pt}{6pt plus 2pt minus 1pt}{2pt plus 1pt minus 1pt}
+  {\normalsize\bfseries}{\thesubsection}{0.55em}{}
+\titlespacing*{\subsection}{0pt}{4.5pt plus 1pt minus 1pt}{1.5pt plus 0.5pt minus 0.5pt}
 
 \titleformat{\subsubsection}
   {\normalsize\itshape}{\thesubsubsection}{0.5em}{}
-\titlespacing*{\subsubsection}{0pt}{4pt plus 1pt minus 1pt}{1.5pt}
+\titlespacing*{\subsubsection}{0pt}{3pt plus 1pt minus 1pt}{1pt}
 
 % Footer notice on page 1
 \fancypagestyle{firstpage}{%
@@ -54,25 +60,25 @@
     \thispagestyle{firstpage}%
     \centering
     \hrule height 4pt
-    \vskip 0.18in
+    \vskip 0.12in
     {\LARGE\bfseries \@title \par}
-    \vskip 0.18in
+    \vskip 0.12in
     \hrule height 1pt
-    \vskip 0.18in
+    \vskip 0.12in
     {\normalsize \@author \par}
-    \vskip 0.14in
+    \vskip 0.08in
   \endgroup
 }
 
 % NeurIPS abstract box
 \renewenvironment{abstract}{%
-  \vskip 0.04in
+  \vskip 0.02in
   \centerline{\large\bfseries Abstract}
-  \vspace{0.2ex}%
+  \vspace{0.1ex}%
   \begin{quote}\small
 }{%
   \par\end{quote}
-  \vskip 0.08in
+  \vskip 0.04in
 }
 
 \endinput

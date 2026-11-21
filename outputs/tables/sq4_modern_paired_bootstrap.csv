@@ -1,0 +1,4 @@
+metric,monthly_equal_weight_delta_modern_minus_1990s,ci95_lower,ci95_upper,n_months,bootstrap
+auc,-0.002149333582871798,-0.00849686159391726,0.00447243569644636,84,"3-month moving-block (monthly means, same test samples)"
+acc,-0.0008337508349965112,-0.012208119553697204,0.011585004901206876,84,"3-month moving-block (monthly means, same test samples)"
+brier,0.005123237770541702,0.0026831396563003515,0.00762808477868889,84,"3-month moving-block (monthly means, same test samples)"

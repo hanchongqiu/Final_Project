@@ -93,15 +93,47 @@ Final_Project/
 │   ├── REPORT_BLUEPRINT.md          # 8页 NeurIPS 报告逐节大纲、图表规划与 AI 披露日志
 │   └── tasks/                       # 4 位组员各自独立的详细任务书与 AI 提示词模板
 ├── scripts/
-│   └── verify_env.py                # 环境、硬件与 1993-2019 数据完整性一键自检脚本
+│   ├── verify_env.py                # 环境、硬件与 1993-2019 数据完整性一键自检脚本
+│   ├── prepare_sq2_data.sh          # SQ2 数据准备脚本
+│   └── sq4_rebuild_figures.py       # SQ4 离线重绘 Figure 4 脚本（无需原始 8.6GB 数据）
 ├── src/visual_alpha/                # 【全组共用底座包】DataLoader / Baseline CNN / 统一评估器
-├── experiments/                     # 各成员可复现的命令行实验脚本
-├── notebooks/                       # 结果可视化、统计检验与报告出图 Notebooks
+├── experiments/                     # 各成员可复现的命令行实验脚本（Baseline / SQ1–SQ4）
+├── notebooks/                       # 结果可视化与 SQ4 交互式复现 Notebook
 ├── outputs/
 │   ├── checkpoints/                 # 模型权重（git-ignored）
 │   ├── predictions/                 # 统一格式的样本外预测结果 .parquet（git-ignored）
+│   ├── gradcam/                     # SQ4 Top-2000 Grad-CAM 数组与抽样图像包
 │   ├── figures/                     # 导出的 300 DPI 论文插图（PDF / PNG）
-│   └── tables/                      # 导出的汇总实验结果表格（CSV / LaTeX）
-└── report/                          # 8页 NeurIPS 技术报告源码与 5 分钟展示 Slides
+│   └── tables/                      # 导出的汇总实验结果表格（CSV / JSON）
+└── report/                          # 8页 NeurIPS 技术报告源码 (main.tex/main.pdf) 与展示 Slides
+```
+
+---
+
+## 5. 一键复现与验证命令
+
+```bash
+# 1. 环境与数据自检 + 单元测试
+.venv/bin/python scripts/verify_env.py
+.venv/bin/pytest
+
+# 2. Baseline (5-seed) & SQ3 校准与选择性预测 (Member A: Hanchong Qiu)
+.venv/bin/python experiments/exp_baseline.py
+.venv/bin/python experiments/exp_sq3_calibration.py
+
+# 3. SQ1 架构归纳偏置对比与遮挡消融 (Member B: Minyi Xie)
+.venv/bin/python experiments/exp_sq1_inductive_bias.py
+.venv/bin/python experiments/plot_sq1.py
+
+# 4. SQ2 标签噪声过滤、标签平滑与多周期对比 (Member C: Dongqing Zhao)
+.venv/bin/python experiments/exp_sq2_label_noise.py
+
+# 5. SQ4 跨时代概念漂移、Top-2000 Grad-CAM 与离线重绘 (Member D: Yan Ziyuan)
+.venv/bin/python experiments/sq4_train_modern.py --repo . --data-dir data/monthly_20d --baseline outputs/predictions/baseline_seed42.parquet --out outputs/sq4_modern
+.venv/bin/python experiments/sq4_run_top2000_gradcam.py --archive outputs/gradcam/SQ4_Top2000_Images.zip --checkpoint outputs/checkpoints/baseline_seed42.pt --repo . --output outputs/sq4_top2000
+.venv/bin/python scripts/sq4_rebuild_figures.py --root .
+
+# 6. 编译 8 页 NeurIPS 技术报告
+cd report && tectonic main.tex   # 或 pdflatex main.tex（运行两次）
 ```
 

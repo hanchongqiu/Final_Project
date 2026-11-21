@@ -10,41 +10,30 @@
 \usepackage{xcolor}
 \usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
 
-\definecolor{todobg}{RGB}{245,247,252}
-\definecolor{todoborder}{RGB}{90,115,175}
-\newcommand{\teammatebox}[2]{%
-  \vspace{4pt}\noindent
-  \fcolorbox{todoborder}{todobg}{%
-    \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
-      \small\textbf{[Pending Module Slot --- #1]}\\[2pt]
-      #2%
-    }%
-  }\vspace{4pt}%
-}
-
 \title{Deconstructing Visual Alpha: An Empirical Audit of Inductive Bias, Label Noise, Calibration, and Concept Drift in Financial Chart CNNs}
 
 \author{
-  \textbf{Hanchong Qiu} \quad
-  \textbf{XIE MINYI} \quad
-  \textbf{Dongqing Zhao} \quad
-  \textbf{[Member D Name]} \\[3pt]
+  \textbf{Hanchong Qiu} (21356531) \quad
+  \textbf{Minyi Xie} (21319480) \quad
+  \textbf{Dongqing Zhao} (21420966) \quad
+  \textbf{Ziyuan Yan} (21219496) \\[2pt]
   Department of Mathematics / Data-Driven Modeling, HKUST \\
-  \texttt{hqiu@connect.ust.hk}\quad\texttt{mxiear@connect.ust.hk}
+  \footnotesize\texttt{hqiuao@connect.ust.hk}\;\;|\;\;\texttt{mxiear@connect.ust.hk}\;\;|\;\;\texttt{dzhaoao@connect.ust.hk}\;\;|\;\;\texttt{1142070808@qq.com} \\
+  \footnotesize Code: \url{https://github.com/hanchongqiu/Final_Project}
 }
 
 \begin{document}
 \maketitle
 
 % =============================================================================
-% ABSTRACT (Drafted with completed Baseline + RQ3 numbers; 1 sentence open for RQ1/2/4)
+% ABSTRACT
 % =============================================================================
 \begin{abstract}
-Jiang, Kelly, and Xiu (2023) demonstrate that convolutional neural networks (CNNs) trained directly on binary stock price-and-volume chart images generate economically substantial out-of-sample return forecasts (``Visual Alpha''). Yet from a statistical machine learning perspective, why high-capacity vision architectures succeed in an environment characterized by extreme aleatoric noise ($\text{accuracy} \approx 52\%$) and structural non-stationarity remains insufficiently understood. Using a panel of $2,196,994$ monthly U.S.\ equity chart observations from 1993 to 2019, we build a unified benchmark split by chart date and conduct a four-stage diagnostic audit across the machine learning pipeline: (1) architectural inductive bias and spatial component masking, (2) supervision noise under near-zero return margins and prediction horizons, (3) probability calibration and selective tail prediction, and (4) temporal concept drift and Grad-CAM visual attribution. Our baseline replication confirms that a $708\text{K}$-parameter 2D-CNN trained strictly on 1993--1999 charts achieves a persistent 2000--2019 out-of-sample equal-weighted long-short decile Sharpe ratio of $1.74 \pm 0.19$ across five seeds ($1.68$ for the 5-seed ensemble, $+22.33\%$ annualized spread, $t = 7.51$). Further, deep ensembling cuts expected calibration error by $51.2\%$ ($0.0215 \to 0.0105$) and elevates directional accuracy monotonically from $52.50\%$ at full market coverage to $57.40\%$ in the top-$5\%$ confidence tail, explaining how modest full-sample classification edges translate into strong cross-sectional portfolio performance. Excluding training returns below 5\% in magnitude reduced test AUC from 0.5322 to 0.5170, while retaining all charts and smoothing labels reduced calibration error from 0.0166 to 0.0137. \textit{[Add RQ1 and RQ4 findings at integration.]}
+Jiang, Kelly, and Xiu (2023) show that convolutional neural networks (CNNs) trained on binary price-and-volume chart images generate economically substantial out-of-sample (OOS) return forecasts (``Visual Alpha''). Yet from a statistical machine learning perspective, why vision architectures generalize under extreme aleatoric noise ($\text{accuracy} \approx 52\%$) and structural non-stationarity remains underexplored. On $2,196,994$ monthly U.S.\ equity charts (1993--2019), we build a unified temporal benchmark and conduct a four-stage diagnostic audit: (1) inductive bias and spatial masking, (2) supervision noise and forecast horizons, (3) probability calibration and selective prediction, and (4) temporal transfer and Grad-CAM attribution. Our 1993--1999 baseline 2D-CNN ($708\text{K}$ parameters) achieves a 2000--2019 equal-weighted long--short decile Sharpe ratio of $1.74 \pm 0.19$ across five seeds ($1.68$ for the 5-seed ensemble, $+22.33\%$ spread, $t = 7.51$). Across model families, the asymmetric 2D-CNN outperforms PCA+LR, LightGBM, a temporal 1D-CNN, and a larger ResNet in portfolio Sharpe, while occlusion confirms that the recent 10 trading days and volume bars carry critical signal. Discarding near-zero training returns ($|\text{Retx}_{20d}| < 5\%$) cuts test AUC from $0.5322$ to $0.5170$, whereas keeping all charts with label smoothing reduces ECE ($0.0166 \to 0.0137$) at zero ranking cost. Five-seed ensembling halves ECE ($0.0215 \to 0.0105$) and lifts selective accuracy monotonically from $52.50\%$ to $57.40\%$ in the top-$5\%$ confidence tail. Finally, frozen-model discrimination declines across decades ($0.5394 \to 0.5218$ pooled AUC), yet 2006--2012 retraining yields no reliable gain on a matched 2013--2019 holdout ($N = 472,357$), while Grad-CAM reveals class-dependent volume attribution ($20.27\%$ predicted-DOWN vs.\ $6.86\%$ predicted-UP).
 \end{abstract}
 
 % =============================================================================
-% SECTION 1: INTRODUCTION & SCIENTIFIC QUESTIONS (Member A — COMPLETE)
+% SECTION 1: INTRODUCTION & SCIENTIFIC QUESTIONS (Hanchong Qiu)
 % =============================================================================
 \section{Introduction and Scientific Questions}
 
@@ -61,7 +50,7 @@ In this study, we reframe the replication of Jiang et al.\ \cite{jiang2023reimag
 \end{itemize}
 
 % =============================================================================
-% SECTION 2: DATASET, ARCHITECTURE & PROTOCOL (Member A — COMPLETE)
+% SECTION 2: DATASET, ARCHITECTURE & PROTOCOL (Hanchong Qiu)
 % =============================================================================
 \section{Dataset, Baseline Architecture, and Evaluation Protocol}
 
@@ -104,7 +93,7 @@ Every model across Sections 2--6 is evaluated via four complementary metrics: (1
 \textbf{Baseline Replication Results.} Table~\ref{tab:baseline} confirms a clean, high-significance replication of Visual Alpha. Individual seeds converge within $5$--$13$ epochs and achieve $52.09\% \pm 0.30\%$ OOS accuracy, $0.5301 \pm 0.0035$ AUC, and an annualized equal-weighted long-short Sharpe ratio of $1.74 \pm 0.19$ ($t$-statistics between $6.56$ and $8.86$, far exceeding the $t > 3.0$ asset-pricing hurdle \cite{gu2020empirical}). Averaging predicted probabilities across all five seeds (\textbf{5-Seed Deep Ensemble}) improves OOS accuracy to $52.50\%$, reduces CE loss to $0.6915$, raises AUC to $0.5355$, and widens the annualized long-short return spread from $19.66\%$ to $22.33\%$ (long leg $+18.19\%$ vs.\ short leg $-4.14\%$, Sharpe $1.68$, $t = 7.51$).
 
 % =============================================================================
-% SECTION 3: RQ1 SLOT (Member B)
+% SECTION 3: RQ1 (Minyi Xie)
 % =============================================================================
 \section{RQ1: Architectural Inductive Bias and Visual Component Ablation}
 We hold the chart pixels fixed and vary how the model processes them. The temporal CNN groups each day's three columns into 192 channels and slides filters along 20 days. The baseline also shares local filters across price levels. Both use the same training split, Adam settings and early stopping. Differences in pooling and parameter count limit attribution to any one architectural choice. For comparison, we fit a 64-component PCA and logistic classifier on 150,000 training charts, fit LightGBM on 12 pixel summaries per five-day block, and train a four-stage residual network.
@@ -128,17 +117,17 @@ Residual CNN & 51.66 & 0.6925 & 0.5252 & 0.0075 & 0.98 \\
 
 The 2D-CNN leads the temporal model by 0.0068 AUC and 0.21 Sharpe (Table~\ref{tab:sq1}). The larger residual network also trails the baseline. Hand-crafted pixel summaries recover much of the overall ranking performance: the tree model comes within 0.0005 AUC, yet its long--short Sharpe is 1.18 against 1.70. Overall discrimination and within-month ranking of the portfolio tails measure different properties. Each alternative was trained once, so small gaps warrant caution.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
 \centering
-\includegraphics[width=0.96\linewidth]{../outputs/figures/fig1_sq1_ablation.pdf}
-\caption{Architecture and occlusion on the full test panel. Right panels show changes from the intact seed-42 chart. Bars with whiskers carry paired 95\% percentile intervals from 2,000 circular block-bootstrap draws of 12-month blocks, retaining all stocks in each selected month.}
+\includegraphics[width=0.80\linewidth]{../outputs/figures/fig1_sq1_ablation.pdf}
+\caption{\textbf{RQ1 Architecture Comparison and Spatial Occlusion (2000--2019 OOS).} Right panels show changes from the intact seed-42 chart. Error bars denote paired 95\% percentile intervals from 2,000 circular block-bootstrap draws of 12-month blocks.}
 \label{fig:sq1}
 \end{figure}
 
 With the weights fixed, hiding the first ten days preserves AUC (0.5332), while hiding the last ten days cuts AUC to 0.5031 and Sharpe to 0.34 (Figure~\ref{fig:sq1}). The equal-area masks indicate much greater sensitivity to the recent half of the chart. Hiding volume alone reduces accuracy by 0.79 percentage points and Sharpe by 0.21. After training a new CNN with volume masked throughout (best validation epoch 10, stopped at 12), accuracy recovers to 51.90\% and AUC to 0.5270. Both remain below the full-chart baseline. The retrained portfolio earns a smaller annualized spread (15.61\% versus 21.32\%) with lower annualized volatility (8.52\% versus 12.57\%), giving a higher Sharpe (1.83 versus 1.70) in this single-seed comparison.
 
 % =============================================================================
-% SECTION 4: RQ2 (Member C)
+% SECTION 4: RQ2 (Dongqing Zhao)
 % =============================================================================
 \section{RQ2: Supervision Noise, Margin Filtering, and Forecast Horizon}
 \label{sec:sq2}
@@ -148,10 +137,10 @@ Binary labels impose a hard discretization on a continuous signal: charts follow
 
 The matrix is fixed in advance and varies supervision only, holding the Section~2 pipeline constant (including hard-label validation CE for early stopping). C0 reuses the delivered seed-42 baseline. C1--C3 drop training charts with $|\text{Retx}_{20d}|$ below $1\%$, $3\%$, and $5\%$ (retaining $89.0\%$, $72.4\%$, $58.6\%$ of $482{,}926$ charts); C4 drops charts whose volatility-standardized return has $|t\text{-stat}| < 0.5$ ($94.4\%$ retained); C5 trains on all charts with smoothed targets; C6--C7 relabel the 1993--1999 charts with 5- and 60-day ex-dividend return signs. Validation ($206{,}968$ charts) and the 2000--2019 test set are never filtered, so every model is early-stopped and scored on its deployment distribution. Each cell trains once (seed 42); single-run contrasts are read against the cross-seed noise floor of Table~\ref{tab:baseline} (AUC $\sigma = 0.0035$), and headline comparisons use a paired moving-block bootstrap over the $240$ monthly long--short spreads (block length 3, $2{,}000$ resamples).
 
-\begin{figure}[htb]
+\begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{../outputs/figures/fig2_sq2_noise_horizon.pdf}
-  \caption{\textbf{Training-only supervision interventions and forecast horizons, 2000--2019 OOS.} \textbf{(a)} Raw return-margin thresholds $\tau$ (open marker: volatility-standardized $|t| \ge 0.5$): training retention (top), test AUC (middle), and long--short Sharpe (bottom) on the full $N = 1{,}491{,}887$ test panel. \textbf{(b)} The same charts relabeled at 5/20/60-day horizons, evaluated on the $1{,}471{,}746$ charts valid at all three: accuracy (top) and mean per-period long--short decile return (middle); the up-label frequency rises from $50.46\%$ to $51.51\%$. Bottom right: label smoothing ($\varepsilon = 0.1$) effect on CE and ECE.}
+  \includegraphics[width=0.82\linewidth]{../outputs/figures/fig2_sq2_noise_horizon.pdf}
+  \caption{\textbf{RQ2 Training-Only Supervision Interventions and Forecast Horizons (2000--2019 OOS).} \textbf{(a)} Return-margin thresholds $\tau$ (open marker: $|t| \ge 0.5$): training retention, test AUC, and L--S Sharpe ($N = 1{,}491{,}887$). \textbf{(b)} Matched 5/20/60-day horizons ($N = 1{,}471{,}746$): accuracy and per-period L--S return (up-label frequency $50.46\% \to 51.51\%$); bottom right: label smoothing ($\varepsilon = 0.1$) CE and ECE.}
   \label{fig:sq2}
 \end{figure}
 
@@ -167,7 +156,7 @@ The matrix is fixed in advance and varies supervision only, holding the Section~
 In short: removing near-zero returns \emph{hurts} supervision at every threshold tested, softening their labels improves calibration for free, and a 20-day chart's information generalizes well beyond the horizon it was labeled for.
 
 % =============================================================================
-% SECTION 5: RQ3 CALIBRATION & SELECTIVE PREDICTION (Member A — COMPLETE)
+% SECTION 5: RQ3 CALIBRATION & SELECTIVE PREDICTION (Hanchong Qiu)
 % =============================================================================
 \section{RQ3: Probability Calibration, Deep Ensembling, and Selective Prediction}
 \label{sec:sq3}
@@ -203,11 +192,10 @@ We investigate two principled calibration mechanisms requiring \emph{zero} archi
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{../outputs/figures/fig3_sq3_calibration.pdf}
-  \vspace{-12pt}
-  \caption{\textbf{RQ3 Probability Calibration and Selective Prediction (2000--2019 OOS, $N=1,491,887$).} \textbf{(a)} Zoomed reliability diagram over the active low-SNR probability support $[0.36, 0.64]$ overlaid with empirical prediction density histograms. \textbf{(b)} Conditional directional accuracy across top-$k\%$ confidence slices ranked by $|\hat{p} - 0.5|$.}
+  \includegraphics[width=0.82\textwidth]{../outputs/figures/fig3_sq3_calibration.pdf}
+  \vspace{-8pt}
+  \caption{\textbf{RQ3 Probability Calibration and Selective Prediction (2000--2019 OOS, $N=1,491,887$).} \textbf{(a)} Zoomed reliability diagram over $[0.36, 0.64]$ with empirical density histograms. \textbf{(b)} Conditional directional accuracy across top-$k\%$ confidence slices ranked by $|\hat{p} - 0.5|$.}
   \label{fig:sq3}
-  \vspace{-6pt}
 \end{figure}
 
 \subsection{Empirical Findings: Variance Reduction Outperforms Post-Hoc Rescaling}
@@ -220,12 +208,72 @@ Table~\ref{tab:sq3} and Figure~\ref{fig:sq3} yield three key statistical insight
 \textbf{3. Selective Prediction Reconciles Modest Overall Accuracy with High Sharpe Ratios.} A recurring puzzle in financial ML is how a classifier with $52.50\%$ full-sample accuracy generates an annualized Sharpe ratio near $1.7$. Figure~\ref{fig:sq3}(b) resolves this via \emph{selective prediction}: ranking observations by confidence margin $|\hat{p} - 0.5|$ and progressively abstaining on ambiguous interior stocks causes OOS accuracy to rise strictly monotonically. For the 5-Seed Ensemble, directional accuracy climbs from $52.50\%$ at $100\%$ coverage to $53.95\%$ at $50\%$ coverage, \textbf{55.48\%} at $20\%$ coverage (precisely the combined universe of the top-$10\%$ long and bottom-$10\%$ short deciles, $|\hat{p}-0.5| \ge 0.057$), \textbf{56.46\%} at $10\%$ coverage, and \textbf{57.40\%} (AUC $0.5770$) in the top-$5\%$ confidence tail ($74,594$ trades, $+0.78$ percentage points above the single CNN at the same coverage). Cross-sectional decile portfolios act as an implicit selective-prediction filter that harvests the high-SNR tails while discarding the noisy near-$0.50$ bulk.
 
 % =============================================================================
-% SECTION 6: RQ4 SLOT (Member D)
+% SECTION 6: RQ4 (Ziyuan Yan)
 % =============================================================================
-\section{RQ4: Temporal Concept Drift and Grad-CAM Visual Attribution}
-\teammatebox{Member D --- Section 6 ($\approx 1.4$ pages, includes Table 3 + Figure 4)}{%
-  \textbf{Planned Content:} (1) Year-by-year rolling OOS trajectory from 2000 to 2019 across dot-com decimalization, the 2008 financial crisis, and 2010s algorithmic trading; head-to-head comparison of \texttt{Model\_1990s} (1993--1999) vs.\ \texttt{Model\_Modern} (2006--2012) on the common 2013--2019 test panel ($N=472,357$). (2) Case-study and Top-1000 population-averaged Grad-CAM attribution maps on Block 3 of \texttt{CNN20D}.%
-}
+\section{RQ4: Temporal Transfer and Grad-CAM Attribution}
+\label{sec:sq4}
+We test whether chart-image signals transfer across market eras. The historical
+\texttt{CNN20D} was trained on 1993--1999 data; an otherwise identical modern
+model was trained on 2006--2012 (355,293 train and 152,268 validation samples)
+with seed 42, Adam ($10^{-5}$), and early stopping. The best checkpoint was
+selected at epoch 11, and both models were evaluated on the \emph{same}
+472,357 labeled stock-month observations from 2013--2019.
+
+For the fixed historical CNN, pooled AUC falls from 0.53943 in 2000--2009
+to 0.52184 in 2010--2019 (the five-seed ensemble falls from 0.54467 to
+0.52228). A three-month-block bootstrap of equally weighted monthly AUCs
+gives a latter-minus-former difference of $-0.00899$ with 95\% confidence
+interval $[-0.01613,-0.00155]$. This is evidence of time-varying
+\emph{performance}, not proof of a change in $P(Y\mid X)$.
+
+\begin{table}[t]
+\centering\small
+\caption{\textbf{RQ4 Common 2013--2019 Holdout Comparison ($N=472,357$).} Cross-entropy and ECE are lower-is-better; simulated L--S Sharpe ratios exclude trading costs.}
+\label{tab:sq4-drift}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Metric} & \textbf{1993--1999 Model} & \textbf{2006--2012 Model} \\
+\midrule
+Accuracy (\%) & \textbf{51.74} & 51.67 \\
+AUC & 0.5217 & \textbf{0.5222} \\
+Cross-Entropy Loss $\downarrow$ & \textbf{0.6939} & 0.7048 \\
+ECE $\downarrow$ & \textbf{0.0227} & 0.0606 \\
+Gross L--S Sharpe & \textbf{1.50} & 1.17 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The modern model's pooled AUC is only $0.00050$ higher, while its calibration
+and cross-entropy worsen (Table~\ref{tab:sq4-drift}). Using 84 matched
+calendar months, the \emph{month-equally-weighted} modern-minus-historical
+AUC change is $-0.00215$, 95\% three-month-block-bootstrap CI
+$[-0.00850,0.00447]$; the corresponding Brier change is $+0.00512$, CI
+$[0.00268,0.00763]$. Thus, recent retraining does not reliably improve
+ranking and worsens probability quality under this protocol.
+
+For visual attribution, we globally selected the 1,000 highest and 1,000
+lowest historical single-model \texttt{prob\_up} values among 1,491,887
+out-of-sample forecasts. Original 64$\times$60 images were recovered by
+immutable year and row index, and all 2,000 predictions matched their
+checkpoint outputs (mean absolute error $9.92\times10^{-8}$). Grad-CAM uses
+the predicted-class logit at the third convolutional block, upsamples to the
+input resolution, and normalizes each map to unit mass. Predicted-UP images
+allocate 6.86\% of mass to the volume band (rows 52--63), versus 20.27\%
+for predicted-DOWN images. The UP-minus-DOWN gap of $-13.41$ percentage points
+has a 95\% month-block-bootstrap CI of $[-14.20,-12.68]$ points.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.78\linewidth]{../outputs/figures/fig4_sq4_drift_gradcam.pdf}
+\caption{\textbf{RQ4 Temporal Transfer and Grad-CAM Attribution.} \textbf{(a)} Frozen-model annual AUC vs.\ modern-model 2013--2019 AUC; \textbf{(b)} example charts and predicted-class Grad-CAM overlays; \textbf{(c--d)} global mean Grad-CAM for Top-1,000 UP and DOWN predictions (dashed line separates price and volume bands; post-hoc attribution, not causal evidence).}
+\label{fig:sq4-gradcam}
+\end{figure}
+
+These findings separate \emph{predictive time instability} from
+\emph{class-conditional spatial attribution}. Neither a fixed-model
+performance decline nor coarse Grad-CAM localization establishes a causal
+market mechanism. A combined-era model and additional modern seeds were
+not run, and gross portfolio performance ignores transaction costs.
 
 % =============================================================================
 % SECTION 7: CONCLUSION, CONTRIBUTIONS & AI STATEMENT (Framework Ready)
@@ -233,22 +281,22 @@ Table~\ref{tab:sq3} and Figure~\ref{fig:sq3} yield three key statistical insight
 \section{Conclusion, Team Contributions, and AI Usage Disclosure}
 
 \subsection{Conclusion and Limitations}
-By auditing chart-based return CNNs across architecture, supervision, calibration, and temporal deployment, we show that Visual Alpha is statistically real and persistent over two decades of U.S.\ equity data, yet governed by tight bias--variance and low-SNR constraints. Deep ensembling substantially improves both ranking quality and probability calibration without post-hoc rescaling fragility, while selective tail prediction bridges the gap between $52.5\%$ overall classification accuracy and $1.7+$ portfolio Sharpe ratios. In the single-seed supervision comparison, keeping near-zero training returns preserved ranking quality, and smoothing all binary targets modestly improved calibration. \textit{[Add RQ1 and RQ4 findings at integration.]} Key limitations include equal-weighted portfolio construction without bid-ask transaction cost deductions and monthly snapshot rebalancing; incorporating turnover-penalized portfolio optimization represents a promising direction for future work.
+By auditing chart-based return CNNs across architecture, supervision, calibration, and temporal deployment, we show that Visual Alpha is statistically real and persistent over two decades of U.S.\ equity data, yet governed by tight bias--variance and low-SNR constraints. RQ1 confirms that the compact asymmetric 2D-CNN outperforms linear, tree-based, 1D temporal, and deeper residual alternatives in risk-adjusted portfolio spreads, relying heavily on the most recent 10 trading days and volume bars. In RQ2, retaining near-zero training returns preserves ranking quality while label smoothing improves calibration for free. In RQ3, deep ensembling cuts calibration error in half without post-hoc rescaling fragility, and selective tail prediction bridges the gap between $52.5\%$ full-sample accuracy and $1.7+$ Sharpe ratios. RQ4 shows that temporal generalization remains fragile: retraining on 2006--2012 does not reliably improve 2013--2019 performance, and Grad-CAM reveals class-conditional volume attribution without establishing causal mechanisms. Key limitations include equal-weighted portfolios omitting transaction costs and monthly snapshot rebalancing; turnover-penalized portfolio optimization is a natural next step.
 
-\subsection*{Team Member Contributions}
-\begin{itemize}[leftmargin=1.5em,itemsep=1pt,topsep=2pt]
-  \item \textbf{Hanchong Qiu (Team Leader, Member A):} Designed overall four-stage research architecture and engineering contracts; implemented the shared \texttt{visual\_alpha} memory-mapped package and unified evaluator; executed 5-seed Baseline CNN replication and RQ3 calibration/selective-prediction experiments; authored Sections 1, 2, and 5.
-  \item \textbf{XIE MINYI (Member B):} Implemented RQ1 cross-family inductive bias models (PCA+LR, LightGBM, 1D-CNN, ResNet) and spatial masking ablations; generated Table 2 and Figure 1; authored Section 3.
-  \item \textbf{Dongqing Zhao (Member C):} Implemented RQ2 margin-filtering ($\tau$ and $t$-stat thresholds), label smoothing, and multi-horizon (5d/20d/60d) experiments; compared matched horizons and paired monthly returns, produced Figure~\ref{fig:sq2}, and wrote Section~\ref{sec:sq2}.
-  \item \textbf{[Member D Name] (Member D):} Implemented RQ4 modern retraining concept-drift experiments and individual/aggregate Grad-CAM visual attribution; generated Table 3 and Figure 4; authored Abstract, Section 6, Section 7, and coordinated final manuscript \& presentation integration.
+\subsection*{Team Contributions}
+\begin{itemize}[leftmargin=1.4em,itemsep=0.5pt,topsep=1pt]
+  \item \textbf{Hanchong Qiu (Team Leader, 21356531):} Designed the four-stage research architecture and contracts; built the shared \texttt{visual\_alpha} memory-mapped package and evaluator; ran 5-seed Baseline replication and RQ3 calibration/selective-prediction experiments; authored Sections 1, 2, 5, and final integration.
+  \item \textbf{Minyi Xie (21319480):} Implemented RQ1 cross-family models (PCA+LR, LightGBM, 1D-CNN, ResNet) and spatial masking ablations; generated Table~\ref{tab:sq1} and Figure~\ref{fig:sq1}; authored Section 3.
+  \item \textbf{Dongqing Zhao (21420966):} Implemented RQ2 margin-filtering ($\tau$, $|t|$-stat), label smoothing, and multi-horizon (5d/20d/60d) experiments; ran paired monthly bootstraps; generated Figure~\ref{fig:sq2} and authored Section~\ref{sec:sq2}.
+  \item \textbf{Ziyuan Yan (21219496):} Implemented RQ4 temporal audit, 2006--2012 CNN retraining, 2013--2019 holdout comparison, and Top-1000 Grad-CAM attribution; generated Table~\ref{tab:sq4-drift}, Figure~\ref{fig:sq4-gradcam}, Section~\ref{sec:sq4}, and SQ4 slides.
 \end{itemize}
 
 \subsection*{Statement on AI and Large Language Model Usage}
-In accordance with MSDM 5054 course policy, we disclose the use of AI assistance (GitHub Copilot Agent in VS Code) during this project: (1) assisting with Python environment configuration (\texttt{uv}), memory-mapped \texttt{np.memmap} data-loader scaffolding, and PyTorch/Matplotlib boilerplate code; (2) diagnosing platform-specific runtime issues on Apple Silicon (\texttt{mps} backend and OpenMP library ordering); and (3) polishing academic English phrasing and \LaTeX{} table formatting. For RQ2, the experiment deployment and Python code were completed by OpenCode (GLM-5.3), and OpenAI Codex assisted with the evaluation plan, prediction checks, statistical interpretation, and the figure; the Section~\ref{sec:sq2} manuscript was written by Member C and polished by OpenCode (GLM-5.3), and all remaining RQ2 work was completed by Member C. Section~\ref{sec:sq2} reports metrics computed from saved model predictions. All experimental hypotheses, dataset schema verifications (including the $\text{Retx}_{20d}$ vs.\ $\text{Ret}_{20d}$ alignment audit), model training runs, quantitative metrics, and scientific interpretations were independently executed and verified by the team members, who take full responsibility for the integrity of this report. \textit{[Update with teammates' AI log entries prior to submission.]}
+In accordance with MSDM 5054 course policy, we disclose all AI/LLM assistance across the team: (1) \textbf{Baseline \& RQ3 (Hanchong Qiu):} GitHub Copilot Agent (VS Code) assisted with \texttt{uv} environment setup, \texttt{np.memmap} data-loader scaffolding, Apple Silicon (\texttt{mps}/OpenMP) debugging, \LaTeX{} formatting, and final presentation slides/script drafting. (2) \textbf{RQ1 (Minyi Xie):} OpenAI Codex assisted with architecture comparison scripts, occlusion experiments, visualization, and drafting Section 3, all manually verified by Minyi Xie. (3) \textbf{RQ2 (Dongqing Zhao):} OpenCode (GLM-5.3) assisted with experiment deployment, Python code, and manuscript polishing, and OpenAI Codex assisted with evaluation design, prediction verification, statistical interpretation, and Figure~\ref{fig:sq2}, with Section~\ref{sec:sq2} authored and verified by Dongqing Zhao. (4) \textbf{RQ4 (Ziyuan Yan):} ChatGPT assisted with source inspection, reproducible script debugging, statistical checks, figures, technical writing, and slide preparation, while full 2006--2012 retraining and 2013--2019 inference were run on team machines and verified against exported artifacts. All hypotheses, schema audits, training runs, metrics, and scientific interpretations were independently verified by the authors, who take full responsibility for this report.
 
 \begin{thebibliography}{9}
-\small
-\setlength{\itemsep}{1.5pt}
+\footnotesize
+\setlength{\itemsep}{0.5pt}
 
 \bibitem{jiang2023reimagining}
 Jingwen Jiang, Bryan Kelly, and Dacheng Xiu.
