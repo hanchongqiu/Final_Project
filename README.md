@@ -14,7 +14,7 @@ Jiang, Kelly, and Xiu (2023) render 20-day U.S. equity OHLC price bars, 20-day m
 | :--- | :--- | :--- | :--- |
 | **Baseline & RQ3** | Core pipeline & calibration | Baseline 5-seed CNN20D replication, post-hoc temperature scaling vs. deep ensembling, and selective tail prediction | **Hanchong Qiu** |
 | **RQ1** | Architecture & input space | 2D-CNN vs. PCA+LR, pixel-summary LightGBM, Temporal 1D-CNN, and ResNet; spatial/temporal occlusion & volume ablation | **Minyi Xie** |
-| **RQ2** | Supervision & horizons | Near-zero return margin filtering ($|\text{Retx}_{20d}| \ge \tau$, $|t\text{-stat}| \ge 0.5$), label smoothing ($\varepsilon = 0.1$), and 5/20/60-day transfer | **Dongqing Zhao** |
+| **RQ2** | Supervision & horizons | Near-zero return margin filtering ($\lvert \text{Retx}_{20d} \rvert \ge \tau$, $\lvert t\text{-stat} \rvert \ge 0.5$), label smoothing ($\varepsilon = 0.1$), and 5/20/60-day transfer | **Dongqing Zhao** |
 | **RQ4** | Temporal transfer & attribution | 2000s vs. 2010s decay, 2006–2012 modern retraining on matched 2013–2019 holdout ($N = 472,357$), and global Top-1,000 Grad-CAM | **Ziyuan Yan** |
 
 ---
@@ -23,7 +23,6 @@ Jiang, Kelly, and Xiu (2023) render 20-day U.S. equity OHLC price bars, 20-day m
 
 - **Assignment Specification**: [`Final Project.pdf`](./Final%20Project.pdf) & official image demo [`Image Demo.html`](./Image%20Demo.html)
 - **8-Page Technical Report (NeurIPS Style)**: [`report/main.pdf`](./report/main.pdf) (source: [`report/main.tex`](./report/main.tex))
-- **Presentation Slides & Script (≤ 5 min)**: [`report/final_presentation.pptx`](./report/final_presentation.pptx) & [`report/final_presentation_script.md`](./report/final_presentation_script.md)
 - **Data Schema, Pixel Coordinates & Evaluation Contract**: [`docs/DATA_AND_CONTRACTS.md`](./docs/DATA_AND_CONTRACTS.md)
 
 ---
@@ -79,8 +78,7 @@ Final_Project/
 ├── scripts/
 │   ├── verify_env.py                # Environment, hardware & 1993–2019 data integrity check
 │   ├── prepare_sq2_data.sh          # SQ2 data preparation helper
-│   ├── sq4_rebuild_figures.py       # Offline Figure 4 rebuild from bundled Grad-CAM artifacts
-│   └── build_presentation.py        # Script generating report/final_presentation.pptx
+│   └── sq4_rebuild_figures.py       # Offline Figure 4 rebuild from bundled Grad-CAM artifacts
 ├── notebooks/
 │   └── SQ4_Results_Walkthrough.ipynb # Interactive RQ4 results walkthrough
 ├── tests/                           # Unit tests for core pipeline, RQ1, and RQ2 horizon logic
@@ -92,9 +90,7 @@ Final_Project/
 │   └── tables/                      # Summary & diagnostic metric tables (CSV / JSON)
 └── report/
     ├── main.tex / main.pdf          # Final 8-page NeurIPS technical report
-    ├── neurips_msdm5054.sty         # NeurIPS-style LaTeX stylesheet
-    ├── final_presentation.pptx      # Final 7-slide presentation deck (with speaker notes)
-    └── final_presentation_script.md # Timed 5-minute English presentation script
+    └── neurips_msdm5054.sty         # NeurIPS-style LaTeX stylesheet
 ```
 
 ---
@@ -118,8 +114,7 @@ Final_Project/
 .venv/bin/python experiments/sq4_run_top2000_gradcam.py --archive outputs/gradcam/SQ4_Top2000_Images.zip --checkpoint outputs/checkpoints/baseline_seed42.pt --repo . --output outputs/sq4_top2000
 .venv/bin/python scripts/sq4_rebuild_figures.py --root .
 
-# 5. Recompile 8-Page Report & Regenerate Slides
+# 5. Recompile 8-Page Report
 cd report && tectonic main.tex   # or pdflatex main.tex (run twice)
-uv run --with python-pptx --with pillow python scripts/build_presentation.py
 ```
 
